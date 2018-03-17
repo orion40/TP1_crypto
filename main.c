@@ -43,6 +43,8 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     size_t len = strlen(m);
     size_t w = (len + 1) / 8;
     //uint64_t 
+    //
+    // TODO: parsing du mot
 
     for (int i = 0; i < COMPRESION_ROUNDS; i++)
         sipround(v);
