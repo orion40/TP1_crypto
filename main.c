@@ -9,6 +9,7 @@
 #define FINALIZATION_ROUNDS 4
 
 uint64_t rotation_shift(const uint64_t value, int shift);
+uint32_t sip_hash_fix32(uint32_t k, uint32_t m);
 void sipround(uint64_t v[4]);
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
 void print_internal_state(uint64_t* v);
@@ -149,9 +150,21 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     return result;
 }
 
+uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
+    uint64_t k64[2];
+    memset(k64, 0, 2 * sizeof(uint64_t));
+    uint8_t m8[4];
+    memset(m8, 0, 2 * sizeof(uint8_t));
 
-int main(int argc, char** argv){
-    // TODO: peut-etre un problème avec little/big endian
+    // Putting k 4 times into k64
+    for (int i = 0; i < 4; i++){
+        k64[i/2] ^= (uint64_t)k << 32 *(i % 2);
+    }
+
+    return siphash_2_4(k64, m8, 4) >> 32;
+}
+
+void question1(){
     uint64_t k[2] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};
     uint64_t k2[2] = {0, 0};
     uint8_t m[15] = {
@@ -180,5 +193,26 @@ int main(int argc, char** argv){
     result = siphash_2_4(k2, NULL, 0);
     assert(result == 0x1e924b9d737700d7);
     printf("OK - 0x%" PRIx64 "\n", result);
+}
 
+void question2(){
+    uint32_t k, m, result;
+    printf("SipHash32\n");
+    printf("===== Test 1 ====\n");
+    k = 0;
+    m = 0;
+    result = sip_hash_fix32(k, m);
+    printf("OK - 0x%" PRIx32 "\n", result);
+
+    printf("===== Test 2 ====\n");
+    k = 0x03020100;
+    m = 0x03020100;
+    result = sip_hash_fix32(k, m);
+    printf("OK - 0x%" PRIx32 "\n", result);
+}
+
+int main(int argc, char** argv){
+    // TODO: peut-etre un problème avec little/big endian
+    question1();
+    question2();
 }
