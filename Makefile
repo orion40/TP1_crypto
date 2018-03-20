@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS=-ggdb -std=c99
+CFLAGS=-ggdb -Wall
 LDFLAGS=
-LIBS=
+LIBS=-lm
 SRC=$(wildcard *.c)
 OBJS=$(SRC:.c=.o)
 TARGET=tp1
