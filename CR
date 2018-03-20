@@ -1,0 +1,11 @@
+Question 2 : Do you think that the key size of sip_hash_2_4 is large enough to make an exhaustive search of the keyspace intractable? Can this function be considered to be collision-resistant?
+
+Here, we have a 2^128 key space. According to the first lesson of the class, if we want to be sure to have a result whitin 34 years (2^30 seconds), we'd need hardware with 2^50 iterations per second, this should be trivially parallelizable, and each device should use 1000W without overhead.
+
+Which, still according to the lesson, mean that we need 2^(128-50-30), so 2^48 machines, which is approximately 280 000 000 GW, about the output of 170 000 000 EPR nuclear power plants.
+
+For a fusion reactor outputting 1500 MWatt per second, this would require about 5 years of production. We just need to figure out fusion first.
+
+Antimatter might be a solution, provided we can find better technology, and not have to spend about 63 trillions for a gram of antimatter. Then the energy would need to be harvested in some way too.
+
+TODO: collision resistant ?
