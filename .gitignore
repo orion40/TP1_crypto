@@ -1,2 +1,5 @@
+*.mm
 *.o
+*.swp
 tp1
+*.pdf
