@@ -7,8 +7,17 @@
 #include <string.h>
 #include <inttypes.h>
 
+/********************************
+*           GLOBAL VAR          *
+*********************************/
+
 #define COMPRESION_ROUNDS 2
 #define FINALIZATION_ROUNDS 4
+
+
+/********************************
+*           PROTOTYPES          *
+*********************************/
 
 void print_internal_state(uint64_t* v);
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t));
@@ -20,6 +29,11 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
 void question1();
 void question3();
 void question4();
+
+
+/********************************
+*           FUNCTION            *
+*********************************/
 
 /*
  * Procedure print_internal_state :
@@ -202,6 +216,51 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
     return siphash_2_4(k64, (uint8_t*)&m, 4) >> 32;
 }
 
+/*
+ * Fonction coll_search :
+ * Effectue ...
+ *  @ARG
+ *      - un uint32_t 'k' cle de 32 bits
+ *      - un pointeur uint32_t 'fun' pour une fonction prenant en
+ *          parametre 2 uint32_t
+ *  @RETURN
+ *      -uint64_t
+ */
+uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
+    uint32_t result1, result2;
+
+    for (uint32_t i = 0; i < UINT32_MAX; i++){
+        printf("qui veut un cake aux olives ?\n");
+        result1 = sip_hash_fix32(k, i);
+        for (uint32_t j = 0; j < UINT32_MAX; j++){
+            printf("qui veut un tuc ?\n");
+            if (i == j) continue;
+            result2 = sip_hash_fix32(k, j);
+            if (result1 == result2){
+                return i > j ? i : j;
+            }
+        }
+    }
+
+    return 0xdeadbeef;
+}
+
+/*
+ * Procedure print_q4_result :
+ * Effectue ...
+ *  @ARG
+ *      - un uint32_t 'i' ...
+ *      - un pointeur uint32_t 'result' ...
+ */
+void print_q4_result(int i, uint32_t result){
+    printf("[%02d] - 0x%" PRIx32 "\n", i, result);
+}
+
+
+/********************************
+*            QUESTION           *
+*********************************/
+
 void question1(){
     // TODO: peut-etre un probleme avec little/big endian
     uint64_t k[2] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};
@@ -260,41 +319,6 @@ void question3(){
     m = 0x03020100;
     result = sip_hash_fix32(k, m);
     printf("OK - 0x%" PRIx32 "\n", result);
-
-}
-
-
-/*
- * Fonction coll_search :
- * Effectue ...
- *  @ARG
- *      - un uint32_t 'k' cle de 32 bits
- *      - un pointeur uint32_t 'fun' pour une fonction prenant en
- *          parametre 2 uint32_t
- *  @RETURN
- *      -uint64_t
- */
-uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
-    uint32_t result1, result2;
-
-    for (uint32_t i = 0; i < UINT32_MAX; i++){
-        printf("qui veut un cake aux olives ?\n");
-        result1 = sip_hash_fix32(k, i);
-        for (uint32_t j = 0; j < UINT32_MAX; j++){
-            printf("qui veut un tuc ?\n");
-            if (i == j) continue;
-            result2 = sip_hash_fix32(k, j);
-            if (result1 == result2){
-                return i > j ? i : j;
-            }
-        }
-    }
-
-    return 0xdeadbeef;
-}
-
-void print_q4_result(int i, uint32_t result){
-    printf("[%02d] - 0x%" PRIx32 "\n", i, result);
 }
 
 void question4(){
@@ -308,6 +332,11 @@ void question4(){
     print_q4_result(3, coll_search(k3, &sip_hash_fix32));
     print_q4_result(4, coll_search(k4, &sip_hash_fix32));
 }
+
+
+/********************************
+*             MAIN              *
+*********************************/
 
 int main(int argc, char** argv){
     question1();
