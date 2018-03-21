@@ -8,4 +8,6 @@ For a fusion reactor outputting 1500 MWatt per second, this would require about 
 
 Antimatter might be a solution, provided we can find better technology, and not have to spend about 63 trillions for a gram of antimatter. Then the energy would need to be harvested in some way too.
 
+But for the collision, we have a problem. The Birthday paradox mean that we have a complexity of 2^{n/2}, so here, we have 4294967296 possibilities, which is not that big.
+
 TODO: collision resistant ?

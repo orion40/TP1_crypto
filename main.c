@@ -214,6 +214,11 @@ void question3(){
 }
 
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
+    uint32_t result1, result2;
+
+    for (uint32_t i = 0; i < UINT32_MAX; i++){
+
+    }
 
     return 0;
 }
