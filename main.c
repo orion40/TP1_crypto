@@ -8,6 +8,7 @@
 #define COMPRESION_ROUNDS 2
 #define FINALIZATION_ROUNDS 4
 
+uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t));
 uint64_t rotation_shift(const uint64_t value, int shift);
 uint32_t sip_hash_fix32(uint32_t k, uint32_t m);
 void sipround(uint64_t v[4]);
@@ -126,7 +127,7 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     for (int i = 0; i < w + padding; i++){
         v[3] ^= mi[i];
 //        print_internal_state(v);
-        for (int i = 0; i < COMPRESION_ROUNDS; i++)
+        for (int j = 0; j < COMPRESION_ROUNDS; j++)
             sipround(v);
 //        printf("After %d rounds of sipround:\n", COMPRESION_ROUNDS);
 //        print_internal_state(v);
@@ -165,6 +166,7 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
 }
 
 void question1(){
+    // TODO: peut-etre un problème avec little/big endian
     uint64_t k[2] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};
     uint64_t k2[2] = {0, 0};
     uint8_t m[15] = {
@@ -195,7 +197,7 @@ void question1(){
     printf("OK - 0x%" PRIx64 "\n", result);
 }
 
-void question2(){
+void question3(){
     uint32_t k, m, result;
     printf("SipHash32\n");
     printf("===== Test 1 ====\n");
@@ -211,8 +213,12 @@ void question2(){
     printf("OK - 0x%" PRIx32 "\n", result);
 }
 
+uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
+
+    return 0;
+}
+
 int main(int argc, char** argv){
-    // TODO: peut-etre un problème avec little/big endian
     question1();
-    question2();
+    question3();
 }
