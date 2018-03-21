@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 #include <endian.h>
 #include <assert.h>
@@ -8,13 +10,25 @@
 #define COMPRESION_ROUNDS 2
 #define FINALIZATION_ROUNDS 4
 
+void print_internal_state(uint64_t* v);
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t));
 uint64_t rotation_shift(const uint64_t value, int shift);
 uint32_t sip_hash_fix32(uint32_t k, uint32_t m);
 void sipround(uint64_t v[4]);
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
-void print_internal_state(uint64_t* v);
 
+void question1();
+void question3();
+
+
+
+/*
+ * Procedure print_internal_state :
+ * Affiche proprement un uint64
+ * @ARG
+ *       - un uint_t64 value representant la valeur sur la quel
+ *          effectuer la rotation
+ */
 void print_internal_state(uint64_t* v){
     printf("0x%" PRIx64 "   ", v[0]);
     printf("0x%" PRIx64 "   ", v[1]);
@@ -22,11 +36,15 @@ void print_internal_state(uint64_t* v){
     printf("0x%" PRIx64 "\n", v[3]);
 }
 
-/*  #### A VERIFIER QUAND MEME #####
+/*
  * Fonction rotation_shift :
- * Prend en arguments
- *       - un uint_t64 value representant la valeur sur la quel effectuer la rotation
- *       - un int shift      representant le nombre de rotation a effectuer
+ * Effectue une rotation d'un chiffre binaire en réinjectant le
+ *  bit de poid fort en bit de poid faible (rotation left)
+ *  @ARG
+ *      - un uint_t64 value representant la valeur sur la quel effectuer la rotation
+ *      - un int shift      representant le nombre de rotation a effectuer
+ *  @RETURN
+ *      -uint64_t rotate on left
  */
 uint64_t rotation_shift(const uint64_t value, int shift){
     if ((shift &= sizeof(value)*8 - 1) == 0)
@@ -99,7 +117,8 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     uint64_t mi[w+padding];
     memset(mi, 0, (w + 1) * sizeof(uint64_t));
 
-    for (int i = 0; i < w; i++){
+    int i;
+    for (i = 0; i < w; i++){
         memcpy(mi+i, m+(i*8), 8);
     }
 
@@ -124,10 +143,11 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     /////////////////////////////////////////////////
     // Compresion rounds
 
-    for (int i = 0; i < w + padding; i++){
+    for (i = 0; i < w + padding; i++){
         v[3] ^= mi[i];
 //        print_internal_state(v);
-        for (int j = 0; j < COMPRESION_ROUNDS; j++)
+        int j;
+        for (j = 0; j < COMPRESION_ROUNDS; j++)
             sipround(v);
 //        printf("After %d rounds of sipround:\n", COMPRESION_ROUNDS);
 //        print_internal_state(v);
@@ -142,7 +162,7 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     v[2] ^= 0xff;
 //    printf("After XORing 0xff\n");
 //    print_internal_state(v);
-    for (int i = 0; i < FINALIZATION_ROUNDS; i++)
+    for (i = 0; i < FINALIZATION_ROUNDS; i++)
         sipround(v);
     uint64_t result = v[0] ^ v[1] ^ v[2] ^ v[3];
 
@@ -158,7 +178,8 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
     memset(m8, 0, 2 * sizeof(uint8_t));
 
     // Putting k 4 times into k64
-    for (int i = 0; i < 4; i++){
+    int i;
+    for (i = 0; i < 4; i++){
         k64[i/2] ^= (uint64_t)k << 32 *(i % 2);
     }
 
@@ -221,4 +242,6 @@ uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
 int main(int argc, char** argv){
     question1();
     question3();
+
+    return 1;
 }

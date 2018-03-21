@@ -15,4 +15,4 @@ $(TARGET): $(OBJS)
 	$(CC) -c $^ $(CFLAGS)
 
 clean:
-	rm -r $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(OBJS)
