@@ -20,14 +20,11 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
 void question1();
 void question3();
 
-
-
 /*
  * Procedure print_internal_state :
- * Affiche proprement un uint64
+ * Affiche proprement chaque uint64_t d'un tableau de 4 uint64_t
  * @ARG
- *       - un uint_t64 value representant la valeur sur la quel
- *          effectuer la rotation
+ *       - un tableau avec 4 uint64_t 'v'
  */
 void print_internal_state(uint64_t* v){
     printf("0x%" PRIx64 "   ", v[0]);
@@ -41,8 +38,8 @@ void print_internal_state(uint64_t* v){
  * Effectue une rotation d'un chiffre binaire en réinjectant le
  *  bit de poid fort en bit de poid faible (rotation left)
  *  @ARG
- *      - un uint_t64 value representant la valeur sur la quel effectuer la rotation
- *      - un int shift      representant le nombre de rotation a effectuer
+ *      - un uint64_t 'value' sur le quel effectuer la rotation
+ *      - un int 'shift' pour le nombre de rotation a effectuer
  *  @RETURN
  *      -uint64_t rotate on left
  */
@@ -55,7 +52,10 @@ uint64_t rotation_shift(const uint64_t value, int shift){
 
 /*
  * Procedure sipround :
- *
+ *  Applique le réseau ARX de SipRound (detail sur doc SipHash avec cours)
+ *  @ARG
+ *      - un tableau de 4 uint64_t 'v' sur les quelles effectuer le
+ *          sipround
  */
 void sipround(uint64_t v[4]){
     v[0] += v[1];
@@ -84,7 +84,13 @@ void sipround(uint64_t v[4]){
 
 /*
  * Procedure siphash_2_4 :
- *
+ * Applique la fonction SipHash sur un message
+ *  @ARG
+ *      - un tableau de 2 uint64_t 'k' la cle de 128 bits (2 fois 64)
+ *      - un pointeur uint8_t 'm' pour le message
+ *      - un unsigned 'mlen' pour la taille du message m
+ *  @RETURN
+ *      - un uint64_t correspondant au message crypte
  */
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     k[0] = htole64(k[0]);
@@ -171,6 +177,15 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     return result;
 }
 
+/*
+ * Fonction sip_hash_fix32 :
+ * Effectue un siphash_2_4 avec une cle de 32 bits sur une message
+ *  @ARG
+ *      - un uint32_t 'k' cle de 32 bits
+ *      - un uint32_t 'm' de 32 bits
+ *  @RETURN
+ *      -uint32_t
+ */
 uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
     uint64_t k64[2];
     memset(k64, 0, 2 * sizeof(uint64_t));
@@ -187,7 +202,7 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
 }
 
 void question1(){
-    // TODO: peut-etre un problème avec little/big endian
+    // TODO: peut-etre un probleme avec little/big endian
     uint64_t k[2] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};
     uint64_t k2[2] = {0, 0};
     uint8_t m[15] = {
@@ -234,6 +249,17 @@ void question3(){
     printf("OK - 0x%" PRIx32 "\n", result);
 }
 
+
+/*
+ * Fonction coll_search :
+ * Effectue ...
+ *  @ARG
+ *      - un uint32_t 'k' cle de 32 bits
+ *      - un pointeur uint32_t 'fun' pour une fonction prenant en
+ *          parametre 2 uint32_t
+ *  @RETURN
+ *      -uint64_t
+ */
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
 
     return 0;
