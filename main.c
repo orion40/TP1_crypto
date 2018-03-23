@@ -14,7 +14,6 @@
 #define COMPRESION_ROUNDS 2
 #define FINALIZATION_ROUNDS 4
 
-
 /********************************
 *           PROTOTYPES          *
 *********************************/
@@ -32,7 +31,7 @@ void question4();
 
 
 /********************************
-*           FUNCTION            *
+*           FUNCTIONS           *
 *********************************/
 
 /*
@@ -105,14 +104,23 @@ void sipround(uint64_t v[4]){
  *      - un pointeur uint8_t 'm' pour le message
  *      - un unsigned 'mlen' pour la taille du message m
  *  @RETURN
- *      - un uint64_t correspondant au message crypte
+ *      - un uint64_t correspondant au hash
  */
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
+    int i;
     k[0] = htole64(k[0]);
     k[1] = htole64(k[1]);
-//    printf("Input key is now:\n");
-//    printf("0x%" PRIx64 "   ", k[0]);
-//    printf("0x%" PRIx64 "\n", k[1]);
+
+#ifdef DEBUG
+    printf("Input key is now:\n");
+    printf("0x%" PRIx64 "   ", k[0]);
+    printf("0x%" PRIx64 "\n", k[1]);
+    printf("Message is now:\n");
+    for (i = 0; i < mlen; i++){
+        printf("0x%" PRIx8 "   ", m[i]);
+    }
+    printf("\n");
+#endif
     uint64_t v[4];
     // Init
     v[0] = k[0] ^ 0x736f6d6570736575;
@@ -120,81 +128,95 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     v[2] = k[0] ^ 0x6c7967656e657261;
     v[3] = k[1] ^ 0x7465646279746573;
 
-//    printf("Initial state:\n");
-//    print_internal_state(v);
-//
-//    printf("m value:\n");
-//    for (int i = 0; i < mlen; i++){
-//        printf("%02hhu  ", m[i]);
-//        if (i !=0 && (i + 1) % 8 == 0) printf("\n");
-//    }
+#ifdef DEBUG
+    printf("Initial state:\n");
+    print_internal_state(v);
+#endif
 
     ////////////// PARSING WORD ////////////
 
     size_t w = ceil((mlen + 1) / 8);
     unsigned padding = 0;
     if (mlen % 8 == 0) padding++;
-//    printf("w = %ld\n", w);
+    //    printf("w = %ld\n", w);
     uint64_t mi[w+padding];
     memset(mi, 0, (w + 1) * sizeof(uint64_t));
 
-    int i;
     for (i = 0; i < w; i++){
         memcpy(mi+i, m+(i*8), 8);
     }
 
-//    for (int i = 0; i < w + padding; i++){
-//        printf("mi[%d] = %#018" PRIx64 "\n", i, mi[i]);
-//    }
+#ifdef DEBUG
+    for (int i = 0; i < w + padding; i++){
+        printf("mi[%d] = %#018" PRIx64 "\n", i, mi[i]);
+    }
+#endif
 
     // Fin du mot
 
     if (padding){
-//        printf("Adding 00's and length to end\n");
+#ifdef DEBUG
+        printf("Adding 00's and length to end\n");
+#endif
         mi[w] ^= (uint64_t)(mlen % 256) << 56;
     } else {
-//        printf("Adding length to end\n");
+#ifdef DEBUG
+        printf("Adding length to end\n");
+#endif
         mi[w-1] ^= (uint64_t)(mlen % 256) << 56;
     }
-//    printf("End word: %#018" PRIx64 "\n", mi[w-1]);
-//    for (int i = 0; i < w + padding; i++){
-//        printf("mi[%d] = %#018" PRIx64 "\n", i, mi[i]);
-//    }
+
+#ifdef DEBUG
+    printf("End word: %#018" PRIx64 "\n", mi[w-1]);
+    for (int i = 0; i < w + padding; i++){
+        printf("mi[%d] = %#018" PRIx64 "\n", i, mi[i]);
+    }
+#endif
 
     /////////////////////////////////////////////////
     // Compresion rounds
 
     for (i = 0; i < w + padding; i++){
         v[3] ^= mi[i];
-//        print_internal_state(v);
+#ifdef DEBUG
+        print_internal_state(v);
+#endif
         int j;
         for (j = 0; j < COMPRESION_ROUNDS; j++)
             sipround(v);
-//        printf("After %d rounds of sipround:\n", COMPRESION_ROUNDS);
-//        print_internal_state(v);
+#ifdef DEBUG
+        printf("After %d rounds of sipround:\n", COMPRESION_ROUNDS);
+        print_internal_state(v);
+#endif
         v[0] ^= mi[i];
-//        printf("XORing v[0] to mi[i]:\n");
-//        print_internal_state(v);
-//        printf("\n");
+#ifdef DEBUG
+        printf("XORing v[0] to mi[i]:\n");
+        print_internal_state(v);
+        printf("\n");
+#endif
     }
 
     // Finalize
 
     v[2] ^= 0xff;
-//    printf("After XORing 0xff\n");
-//    print_internal_state(v);
+#ifdef DEBUG
+    printf("After XORing 0xff\n");
+    print_internal_state(v);
+#endif
     for (i = 0; i < FINALIZATION_ROUNDS; i++)
         sipround(v);
     uint64_t result = v[0] ^ v[1] ^ v[2] ^ v[3];
 
-//    printf("And the result is: 0x%" PRIx64 "\n", result);
+#ifdef DEBUG
+    printf("And the result is: 0x%" PRIx64 "\n", result);
+#endif
 
     return result;
 }
 
 /*
  * Fonction sip_hash_fix32 :
- * Effectue un siphash_2_4 avec une cle de 32 bits sur une message
+ * Effectue un siphash_2_4 avec une cle de 32 bits sur un message
  *  @ARG
  *      - un uint32_t 'k' cle de 32 bits
  *      - un uint32_t 'm' de 32 bits
@@ -204,16 +226,22 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
 uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
     uint64_t k64[2];
     memset(k64, 0, 2 * sizeof(uint64_t));
-    //uint8_t m8[4];
-    //memset(m8, 0, 2 * sizeof(uint8_t));
+    uint8_t m8[4];
+    memset(m8, 0, 2 * sizeof(uint8_t));
 
     // Putting k 4 times into k64
     int i;
     for (i = 0; i < 4; i++){
         k64[i/2] ^= (uint64_t)k << 32 *(i % 2);
     }
+    printf("m - 0x%" PRIx32 "\n", m);
 
-    return siphash_2_4(k64, (uint8_t*)&m, 4) >> 32;
+    for (i = 0; i < 4; i++){
+        m8[i] ^= (uint8_t) (m >> 8 * i);
+        printf("[%02d] - 0x%" PRIx8 "\n", i, m8[i]);
+    }
+
+    return siphash_2_4(k64, m8, 32) >> 32;
 }
 
 /*
@@ -258,8 +286,8 @@ void print_q4_result(int i, uint32_t result){
 
 
 /********************************
-*            QUESTION           *
-*********************************/
+ *            QUESTION           *
+ *********************************/
 
 void question1(){
     // TODO: peut-etre un probleme avec little/big endian
@@ -291,34 +319,34 @@ void question1(){
     result = siphash_2_4(k2, NULL, 0);
     assert(result == 0x1e924b9d737700d7);
     printf("OK - 0x%" PRIx64 "\n", result);
+
+    printf("===== More Tests ====\n");
+    result = siphash_2_4(k2, m, 15);
+    printf("0x%" PRIx64 "\n", result);
+    result = siphash_2_4(k2, m2, 15);
+    printf("0x%" PRIx64 "\n", result);
 }
 
 void question3(){
     uint32_t k, m, result;
+    uint32_t i;
+    uint32_t max = 1000000;
     printf("SipHash32\n");
-    printf("===== Test 1 ====\n");
-    k = 0;
-    m = 0;
-    result = sip_hash_fix32(k, m);
-    printf("OK - 0x%" PRIx32 "\n", result);
+    for (i = 1; i < max; i*=10){
+        printf("===== Test %d ====\n", i);
+        k = 0;
+        m = i;
+        result = sip_hash_fix32(k, m);
+        printf("OK - 0x%" PRIx32 "\n", result);
+    }
 
-    printf("===== Test 2 ====\n");
-    k = 0;
-    m = 1;
-    result = sip_hash_fix32(k, m);
-    printf("OK - 0x%" PRIx32 "\n", result);
-
-    printf("===== Test 3 ====\n");
-    k = 0;
-    m = 2;
-    result = sip_hash_fix32(k, m);
-    printf("OK - 0x%" PRIx32 "\n", result);
-
+    /*
     printf("===== Test 4 ====\n");
     k = 0x03020100;
     m = 0x03020100;
     result = sip_hash_fix32(k, m);
     printf("OK - 0x%" PRIx32 "\n", result);
+    */
 }
 
 void question4(){
@@ -335,13 +363,13 @@ void question4(){
 
 
 /********************************
-*             MAIN              *
-*********************************/
+ *             MAIN              *
+ *********************************/
 
 int main(int argc, char** argv){
     question1();
     question3();
-    question4();
+    //question4();
 
     return 1;
 }
