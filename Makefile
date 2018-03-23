@@ -1,5 +1,6 @@
 CC=gcc
-CFLAGS=-ggdb -Wall
+CFLAGS=-Wall
+DEBUG= -ggdb  #-DDEBUG
 LDFLAGS=
 LIBS=-lm
 SRC=$(wildcard *.c)
@@ -12,7 +13,7 @@ $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $^ $(LIBS) -o $@
 
 %.o:%.c
-	$(CC) -c $^ $(CFLAGS)
+	$(CC) -c $^ $(CFLAGS) $(DEBUG)
 
 clean:
 	rm -f $(TARGET) $(OBJS)
