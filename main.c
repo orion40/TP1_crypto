@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
@@ -13,6 +14,7 @@
 
 #define COMPRESION_ROUNDS 2
 #define FINALIZATION_ROUNDS 4
+#define RAINBOW_PATH "./rainbow"
 
 /********************************
 *           PROTOTYPES          *
@@ -216,7 +218,8 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
 
 /*
  * Fonction sip_hash_fix32 :
- * Effectue un siphash_2_4 avec une cle de 32 bits sur un message
+ * Effectue un siphash_2_4 avec une cle de 32 bits sur un message,
+ * et renvoie les 32 bits de poids fort
  *  @ARG
  *      - un uint32_t 'k' cle de 32 bits
  *      - un uint32_t 'm' de 32 bits
@@ -234,11 +237,16 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
     for (i = 0; i < 4; i++){
         k64[i/2] ^= (uint64_t)k << 32 *(i % 2);
     }
+
+#ifdef DEBUG
     printf("m - 0x%" PRIx32 "\n", m);
+#endif
 
     for (i = 0; i < 4; i++){
         m8[i] ^= (uint8_t) (m >> 8 * i);
+#ifdef DEBUG
         printf("[%02d] - 0x%" PRIx8 "\n", i, m8[i]);
+#endif
     }
 
     return siphash_2_4(k64, m8, 32) >> 32;
@@ -255,22 +263,45 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
  *      -uint64_t
  */
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
-    uint32_t result1, result2;
+    uint32_t max;
 
-    for (uint32_t i = 0; i < UINT32_MAX; i++){
-        printf("qui veut un cake aux olives ?\n");
-        result1 = sip_hash_fix32(k, i);
-        for (uint32_t j = 0; j < UINT32_MAX; j++){
-            printf("qui veut un tuc ?\n");
+    max = 2<<19;
+
+    uint32_t hash[max];
+
+    puts("Computing rainbow table...");
+    for (uint32_t i = 0; i < max; i+=8){
+        hash[i+0] = fun(k, i);
+        hash[i+1] = fun(k, i+1);
+        hash[i+2] = fun(k, i+2);
+        hash[i+3] = fun(k, i+3);
+        hash[i+4] = fun(k, i+4);
+        hash[i+5] = fun(k, i+5);
+        hash[i+6] = fun(k, i+6);
+        hash[i+7] = fun(k, i+7);
+    }
+
+    for (uint32_t i = 0; i < max; i++){
+#ifdef DEBUG
+        printf("Iterating through %d...\n", i);
+#endif
+        for (uint32_t j = 0; j < max; j++){
             if (i == j) continue;
-            result2 = sip_hash_fix32(k, j);
-            if (result1 == result2){
+            if (hash[i] == hash[j]){
+                printf("Collision found:\n");
+                printf("[%02d] - 0x%" PRIx32 "\n", i, hash[i]);
+                printf("[%02d] - 0x%" PRIx32 "\n", j, hash[j]);
                 return i > j ? i : j;
             }
+#ifdef DEBUG
+            if (j % 10000 == 0){
+                printf("j is at %d...\n", j);
+            }
+#endif
         }
     }
 
-    return 0xdeadbeef;
+    return 0;
 }
 
 /*
@@ -281,7 +312,7 @@ uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
  *      - un pointeur uint32_t 'result' ...
  */
 void print_q4_result(int i, uint32_t result){
-    printf("[%02d] - 0x%" PRIx32 "\n", i, result);
+    printf("Results for %02d - 0x%" PRIx32 "\n", i, result);
 }
 
 
@@ -340,13 +371,32 @@ void question3(){
         printf("OK - 0x%" PRIx32 "\n", result);
     }
 
-    /*
-    printf("===== Test 4 ====\n");
+    m = 0;
+
+    printf("===== Test %d ====\n", i + 1);
     k = 0x03020100;
-    m = 0x03020100;
     result = sip_hash_fix32(k, m);
     printf("OK - 0x%" PRIx32 "\n", result);
-    */
+    printf("===== Test %d ====\n", i + 2);
+    k = 0x07060504;
+    result = sip_hash_fix32(k, m);
+    printf("OK - 0x%" PRIx32 "\n", result);
+    printf("===== Test %d ====\n", i + 3);
+    k = 0x0b0a0908;
+    result = sip_hash_fix32(k, m);
+    printf("OK - 0x%" PRIx32 "\n", result);
+    printf("===== Test %d ====\n", i + 4);
+    k = 0x0f0e0d0c;
+    result = sip_hash_fix32(k, m);
+    printf("OK - 0x%" PRIx32 "\n", result);
+
+    /*
+       printf("===== Test 4 ====\n");
+       k = 0x03020100;
+       m = 0x03020100;
+       result = sip_hash_fix32(k, m);
+       printf("OK - 0x%" PRIx32 "\n", result);
+       */
 }
 
 void question4(){
@@ -369,7 +419,7 @@ void question4(){
 int main(int argc, char** argv){
     question1();
     question3();
-    //question4();
+    question4();
 
     return 1;
 }
