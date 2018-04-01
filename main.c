@@ -1,12 +1,15 @@
-#include <stdio.h>
+#include <cstdio>
+#include <cstdint>
+#include <cstdlib>
+#include <cmath>
+#include <cassert>
+#include <cstring>
+#include <cinttypes>
+
+#include <unordered_map>
+
 #include <unistd.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <math.h>
 #include <endian.h>
-#include <assert.h>
-#include <string.h>
-#include <inttypes.h>
 
 /********************************
 *           GLOBAL VAR          *
@@ -15,6 +18,7 @@
 #define COMPRESION_ROUNDS 2
 #define FINALIZATION_ROUNDS 4
 #define RAINBOW_PATH "./rainbow"
+#define NB_COLL_TEST 100
 
 /********************************
 *           PROTOTYPES          *
@@ -27,9 +31,12 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m);
 void sipround(uint64_t v[4]);
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
 
+uint64_t twine_perm_z(uint64_t input);
+
 void question1();
 void question3();
 void question4();
+void question6();
 
 
 /********************************
@@ -109,7 +116,7 @@ void sipround(uint64_t v[4]){
  *      - un uint64_t correspondant au hash
  */
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
-    int i;
+    uint64_t i;
     k[0] = htole64(k[0]);
     k[1] = htole64(k[1]);
 
@@ -140,7 +147,6 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     size_t w = ceil((mlen + 1) / 8);
     unsigned padding = 0;
     if (mlen % 8 == 0) padding++;
-    //    printf("w = %ld\n", w);
     uint64_t mi[w+padding];
     memset(mi, 0, (w + 1) * sizeof(uint64_t));
 
@@ -267,39 +273,16 @@ uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
 
     max = 2<<19;
 
-    uint32_t hash[max];
+    std::unordered_map<uint32_t, uint32_t> hashmap;
 
-    puts("Computing rainbow table...");
-    for (uint32_t i = 0; i < max; i+=8){
-        hash[i+0] = fun(k, i);
-        hash[i+1] = fun(k, i+1);
-        hash[i+2] = fun(k, i+2);
-        hash[i+3] = fun(k, i+3);
-        hash[i+4] = fun(k, i+4);
-        hash[i+5] = fun(k, i+5);
-        hash[i+6] = fun(k, i+6);
-        hash[i+7] = fun(k, i+7);
-    }
-
+    puts("Computing rainbow table & checking for collisions...");
     for (uint32_t i = 0; i < max; i++){
-#ifdef DEBUG
-        printf("Iterating through %d...\n", i);
-#endif
-        for (uint32_t j = 0; j < max; j++){
-            if (i == j) continue;
-            if (hash[i] == hash[j]){
-                printf("Collision found:\n");
-                printf("[%02d] - 0x%" PRIx32 "\n", i, hash[i]);
-                printf("[%02d] - 0x%" PRIx32 "\n", j, hash[j]);
-                return i > j ? i : j;
-            }
-#ifdef DEBUG
-            if (j % 10000 == 0){
-                printf("j is at %d...\n", j);
-            }
-#endif
-        }
+        std::pair<std::unordered_map<uint32_t, uint32_t>::iterator, bool > result;
+        result = hashmap.insert({fun(i,k), i});
+        if (result.second == false)
+            return i;
     }
+    puts("Done. No collision found.");
 
     return 0;
 }
@@ -315,9 +298,27 @@ void print_q4_result(int i, uint32_t result){
     printf("Results for %02d - 0x%" PRIx32 "\n", i, result);
 }
 
+uint64_t twine_perm_z(uint64_t input){
+    uint64_t rk = 0;
+    unsigned i, j, h;
+
+    for (i = 0; i < 36; i++){
+        for (j = 0; j < 8; j++){
+
+        }
+        for (h = 0; h < 16; h++){
+            
+        }
+    }
+
+    for (j = 0; j < 8; j++){
+
+    }
+    return 0;
+}
 
 /********************************
- *            QUESTION           *
+ *            QUESTIONS          *
  *********************************/
 
 void question1(){
@@ -404,13 +405,38 @@ void question4(){
     uint32_t k2 = 0x07060504;
     uint32_t k3 = 0x0b0a0908;
     uint32_t k4 = 0x0f0e0d0c;
+    int i;
 
     print_q4_result(1, coll_search(k1, &sip_hash_fix32));
     print_q4_result(2, coll_search(k2, &sip_hash_fix32));
     print_q4_result(3, coll_search(k3, &sip_hash_fix32));
     print_q4_result(4, coll_search(k4, &sip_hash_fix32));
+    for (i = 0; i < NB_COLL_TEST; i++){
+        print_q4_result(i, coll_search(i, &sip_hash_fix32));
+    }
 }
 
+void question6(){
+    uint64_t input, result;
+
+    printf("===== Test 1 ====\n");
+    input = 0x0000000000000000ULL;
+    result = twine_perm_z(input);
+    assert(result == 0xb0049660a2858d43);
+    printf("OK - 0x%" PRIx64 "\n", result);
+
+    printf("===== Test 2 ====\n");
+    input = 0x123456789abcdef1ULL;
+    result = twine_perm_z(input);
+    assert(result == 0x00de04856ecd7ad0);
+    printf("OK - 0x%" PRIx64 "\n", result);
+
+    printf("===== Test 3 ====\n");
+    input = 0xb4329ed38453aac8ULL;
+    result = twine_perm_z(input);
+    assert(result == 0xd0790f39b4d2ecab);
+    printf("OK - 0x%" PRIx64 "\n", result);
+}
 
 /********************************
  *             MAIN              *
@@ -420,6 +446,7 @@ int main(int argc, char** argv){
     question1();
     question3();
     question4();
+    question6();
 
     return 1;
 }
