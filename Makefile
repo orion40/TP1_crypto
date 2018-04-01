@@ -1,5 +1,5 @@
-CC=gcc
-CFLAGS=-Wall
+CC=g++
+CFLAGS=-Wall -std=c++11 -O3
 DEBUG= -ggdb  #-DDEBUG
 LDFLAGS=
 LIBS=-lm
