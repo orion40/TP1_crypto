@@ -29,4 +29,6 @@ The probability of someone sharing a birthday with someone else in a room of $n$
 
 Outputting that smaller raibow table result in a file that's about 11MB large, which can be held in memory. Computing such a table is very fast, and we are able to find a collision in less than a second. Interestingly, the collision is always found at the same place for different keys: 
 
+We decided to use a C++ unordered_map, which let us insert only unique keys. If we happen to insert a key that already exist, we can know about it from the object being returned. So we just have to start building the table, and check for an insertionfailure, which will indicate a collision. No extra search is required, and the rainbow table might not even have to be fully computed.
+
 \end{document}
