@@ -30,7 +30,6 @@ uint64_t rotation_shift(const uint64_t value, int shift);
 uint32_t sip_hash_fix32(uint32_t k, uint32_t m);
 void sipround(uint64_t v[4]);
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
-
 uint64_t twine_perm_z(uint64_t input);
 
 void question1();
@@ -194,13 +193,15 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
 
 /*
  * Fonction coll_search :
- * Effectue ...
+ * Effectue une recherche de colission (recherche 2 résultats égaux
+ *	pour 2 indices de la function fun avec une clé 'k')
  *  @ARG
  *      - un uint32_t 'k' cle de 32 bits
  *      - un pointeur uint32_t 'fun' pour une fonction prenant en
  *          parametre 2 uint32_t
  *  @RETURN
- *      -uint64_t
+ *      -uint64_t 'i' 2ème indice pour le quel la fonction fun à
+ *			le même résultat.
  */
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
     uint32_t max;
@@ -223,33 +224,44 @@ uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
 
 /*
  * Procedure print_q4_result :
- * Effectue ...
+ * Affiche proprement un hexadecimal (pour la question 4)
  *  @ARG
- *      - un uint32_t 'i' ...
- *      - un pointeur uint32_t 'result' ...
+ *      - un int 'i' indice de l'hexadecimal à afficher
+ *      - un uint32_t 'result' hexadecimal à afficher
  */
 void print_q4_result(int i, uint32_t result){
     printf("Results for %02d - 0x%" PRIx32 "\n", i, result);
 }
 
+
+/*
+ * Procedure twine_perm_z :
+ * Effectue un chiffrement
+ *  @ARG
+ *      - un uint64_t 'input' entrée à chiffrer
+ *  @RETURN
+ *      -uint64_t 'out' input chiffré par twin_perm_z
+ */
 uint64_t twine_perm_z(uint64_t input){
     uint64_t rk = 0;
-    unsigned i, j, h;
+    unsigned i, j, k, l;
+    uint64_t out = 0;
 
     for (i = 0; i < 36; i++){
         for (j = 0; j < 8; j++){
 
         }
-        for (h = 0; h < 16; h++){
-            
+        for (k = 0; k < 16; k++){
+
         }
     }
 
-    for (j = 0; j < 8; j++){
+    for (l = 0; l < 8; l++){
 
     }
-    return 0;
+    return out;
 }
+
 
 /********************************
  *            QUESTIONS          *
@@ -265,6 +277,9 @@ void question1(){
     };
     uint8_t m2[8] = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7};
     uint64_t result;
+
+    printf("=====================\n");
+    printf("===== Question 1 ====\n");
 
     printf("===== Test 1 ====\n");
     result = siphash_2_4(k, m, 15);
@@ -297,6 +312,9 @@ void question3(){
     uint32_t k, m, result;
     uint32_t i;
     uint32_t max = 1000000;
+    printf("=====================\n");
+    printf("===== Question 3 ====\n");
+
     printf("SipHash32\n");
     for (i = 1; i < max; i*=10){
         printf("===== Test %d ====\n", i);
@@ -341,6 +359,9 @@ void question4(){
     uint32_t k4 = 0x0f0e0d0c;
     int i;
 
+    printf("=====================\n");
+    printf("===== Question 4 ====\n");
+
     print_q4_result(1, coll_search(k1, &sip_hash_fix32));
     print_q4_result(2, coll_search(k2, &sip_hash_fix32));
     print_q4_result(3, coll_search(k3, &sip_hash_fix32));
@@ -352,6 +373,9 @@ void question4(){
 
 void question6(){
     uint64_t input, result;
+
+    printf("=====================\n");
+    printf("===== Question 6 ====\n");
 
     printf("===== Test 1 ====\n");
     input = 0x0000000000000000ULL;
