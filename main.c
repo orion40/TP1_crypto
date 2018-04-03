@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
@@ -349,10 +352,10 @@ void question3(){
 }
 
 void question4(){
-    int i;
-
     printf("\n=====================\n");
     printf("===== Question 4 ====\n");
+
+    int i;
 
     for (i = 0; i < NB_COLL_TEST; i++){
         print_q4_result(i, coll_search(i, &sip_hash_fix32));
@@ -362,54 +365,39 @@ void question4(){
 void question5(){
 	printf("\n=====================\n");
     printf("===== Question 5 ====\n");
+
     float min, max, moyenne;
     clock_t t1,t2;
     float tabTemps[1000];
-    int i = 0;
+    int i, k;
+    srandom(time(0));
+    long int rand = random();
 
-    printf("===== Test 1 (clé fixe) ====\n");
-    for (i = 0; i < 1000; i++){
-		t1 = clock();
-    	coll_search(i, &sip_hash_fix32);
-	    t2 = clock();
-	    tabTemps[i]= (float)(t2-t1)/CLOCKS_PER_SEC;
-    }
+    for (i=1; i < 3; i++){
+	    printf("===== Test %d ====\n", i);
+	    for (k = 0; k < 1000; k++){
+			t1 = clock();
+	    	coll_search(rand, &sip_hash_fix32);
+		    t2 = clock();
+		    tabTemps[k]= (float)(t2-t1)/CLOCKS_PER_SEC;
+		    rand++;
+	    }
 
-    min = max = moyenne = tabTemps[0];
+	    min = max = moyenne = tabTemps[0];
 
-    for (i = 1; i < 1000; i++){
-		if (min > tabTemps[i])
-			min = tabTemps[i];
-		if (max < tabTemps[i])
-			max = tabTemps[i];
-		moyenne += tabTemps[i];
-    }
+	    for (k = 1; k < 1000; k++){
+	    	printf("t%d : %f   ",k, tabTemps[k]);
+			if (min > tabTemps[k])
+				min = tabTemps[k];
+			if (max < tabTemps[k])
+				max = tabTemps[k];
+			moyenne += tabTemps[k];
+	    }
 
-    printf("temps min (clé fixe) = %f s\n", min);
-    printf("temps max (clé fixe) = %f s\n", max);
-    printf("temps moyen (clé fixe) = %f s\n", moyenne/1000);
-
-    printf("===== Test 2 (clé distincte) ====\n");
-    for (i = 0; i < 1000; i++){
-		t1 = clock();
-    	coll_search(i, &sip_hash_fix32);
-	    t2 = clock();
-	    tabTemps[i]= (float)(t2-t1)/CLOCKS_PER_SEC;
-    }
-
-    min = max = moyenne = tabTemps[0];
-
-    for (i = 1; i < 1000; i++){
-		if (min > tabTemps[i])
-			min = tabTemps[i];
-		if (max < tabTemps[i])
-			max = tabTemps[i];
-		moyenne += tabTemps[i];
-    }
-
-    printf("temps min (clé distincte) = %f s\n", min);
-    printf("temps max (clé distincte) = %f s\n", max);
-    printf("temps moyen (clé distincte) = %f s\n", moyenne/1000);
+	    printf("temps min = %f s\n", min);
+	    printf("temps max = %f s\n", max);
+	    printf("temps moyen = %f s\n", moyenne/1000);
+	}
 }
 
 void question6(){
@@ -445,7 +433,7 @@ int main(int argc, char** argv){
     question1();
     question3();
     question4();
-    question5();
+    question5(); // Long ...
     //question6();
 
     return 1;
