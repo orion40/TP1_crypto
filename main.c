@@ -115,20 +115,10 @@ void sipround(uint64_t v[4]){
  *      - un uint64_t correspondant au hash
  */
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
-    uint64_t i;
+    uint64_t i, j;
     k[0] = htole64(k[0]);
     k[1] = htole64(k[1]);
 
-#ifdef DEBUG
-    printf("Input key is now:\n");
-    printf("0x%" PRIx64 "   ", k[0]);
-    printf("0x%" PRIx64 "\n", k[1]);
-    printf("Message is now:\n");
-    for (i = 0; i < mlen; i++){
-        printf("0x%" PRIx8 "   ", m[i]);
-    }
-    printf("\n");
-#endif
     uint64_t v[4];
     // Init
     v[0] = k[0] ^ 0x736f6d6570736575;
@@ -136,13 +126,7 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
     v[2] = k[0] ^ 0x6c7967656e657261;
     v[3] = k[1] ^ 0x7465646279746573;
 
-#ifdef DEBUG
-    printf("Initial state:\n");
-    print_internal_state(v);
-#endif
-
     ////////////// PARSING WORD ////////////
-
     size_t w = ceil((mlen + 1) / 8);
     unsigned padding = 0;
     if (mlen % 8 == 0) padding++;
@@ -153,70 +137,27 @@ uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen){
         memcpy(mi+i, m+(i*8), 8);
     }
 
-#ifdef DEBUG
-    for (int i = 0; i < w + padding; i++){
-        printf("mi[%d] = %#018" PRIx64 "\n", i, mi[i]);
-    }
-#endif
-
     // Fin du mot
-
     if (padding){
-#ifdef DEBUG
-        printf("Adding 00's and length to end\n");
-#endif
         mi[w] ^= (uint64_t)(mlen % 256) << 56;
     } else {
-#ifdef DEBUG
-        printf("Adding length to end\n");
-#endif
         mi[w-1] ^= (uint64_t)(mlen % 256) << 56;
     }
 
-#ifdef DEBUG
-    printf("End word: %#018" PRIx64 "\n", mi[w-1]);
-    for (int i = 0; i < w + padding; i++){
-        printf("mi[%d] = %#018" PRIx64 "\n", i, mi[i]);
-    }
-#endif
-
     /////////////////////////////////////////////////
     // Compresion rounds
-
     for (i = 0; i < w + padding; i++){
         v[3] ^= mi[i];
-#ifdef DEBUG
-        print_internal_state(v);
-#endif
-        int j;
         for (j = 0; j < COMPRESION_ROUNDS; j++)
             sipround(v);
-#ifdef DEBUG
-        printf("After %d rounds of sipround:\n", COMPRESION_ROUNDS);
-        print_internal_state(v);
-#endif
         v[0] ^= mi[i];
-#ifdef DEBUG
-        printf("XORing v[0] to mi[i]:\n");
-        print_internal_state(v);
-        printf("\n");
-#endif
     }
 
     // Finalize
-
     v[2] ^= 0xff;
-#ifdef DEBUG
-    printf("After XORing 0xff\n");
-    print_internal_state(v);
-#endif
     for (i = 0; i < FINALIZATION_ROUNDS; i++)
         sipround(v);
     uint64_t result = v[0] ^ v[1] ^ v[2] ^ v[3];
-
-#ifdef DEBUG
-    printf("And the result is: 0x%" PRIx64 "\n", result);
-#endif
 
     return result;
 }
@@ -243,15 +184,8 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
         k64[i/2] ^= (uint64_t)k << 32 *(i % 2);
     }
 
-#ifdef DEBUG
-    printf("m - 0x%" PRIx32 "\n", m);
-#endif
-
     for (i = 0; i < 4; i++){
         m8[i] ^= (uint8_t) (m >> 8 * i);
-#ifdef DEBUG
-        printf("[%02d] - 0x%" PRIx8 "\n", i, m8[i]);
-#endif
     }
 
     return siphash_2_4(k64, m8, 32) >> 32;
