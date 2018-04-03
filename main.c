@@ -7,7 +7,6 @@
 #include <cinttypes>
 #include <unordered_map>
 #include <time.h>
-
 #include <unistd.h>
 #include <endian.h>
 
@@ -37,7 +36,6 @@ void question3();
 void question4();
 void question5();
 void question6();
-
 
 /********************************
 *           FUNCTIONS           *
@@ -72,7 +70,6 @@ uint64_t rotation_shift(const uint64_t value, int shift){
     return (value << shift) | (value >> (sizeof(value)*8 - shift));
 }
 
-
 /*
  * Procedure sipround :
  *  Applique le réseau ARX de SipRound (detail sur doc SipHash avec cours)
@@ -103,7 +100,6 @@ void sipround(uint64_t v[4]){
 
     v[2] = rotation_shift(v[2], 32);
 }
-
 
 /*
  * Procedure siphash_2_4 :
@@ -211,14 +207,14 @@ uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
 
     std::unordered_map<uint32_t, uint32_t> hashmap;
 
-    puts("Computing rainbow table & checking for collisions...");
+    //puts("Computing rainbow table & checking for collisions...");
     for (uint32_t i = 0; i < max; i++){
         std::pair<std::unordered_map<uint32_t, uint32_t>::iterator, bool > result;
         result = hashmap.insert({fun(i,k), i});
         if (result.second == false)
             return i;
     }
-    puts("Done. No collision found.");
+    //puts("Done. No collision found.");
 
     return 0;
 }
@@ -233,7 +229,6 @@ uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
 void print_q4_result(int i, uint32_t result){
     printf("Results for %02d - 0x%" PRIx32 "\n", i, result);
 }
-
 
 /*
  * Procedure twine_perm_z :
@@ -262,7 +257,6 @@ uint64_t twine_perm_z(uint64_t input){
     }
     return out;
 }
-
 
 /********************************
  *            QUESTIONS          *
@@ -357,7 +351,7 @@ void question3(){
 void question4(){
     int i;
 
-    printf("=====================\n");
+    printf("\n=====================\n");
     printf("===== Question 4 ====\n");
 
     for (i = 0; i < NB_COLL_TEST; i++){
@@ -368,17 +362,54 @@ void question4(){
 void question5(){
 	printf("\n=====================\n");
     printf("===== Question 5 ====\n");
-    float temps;
+    float min, max, moyenne;
     clock_t t1,t2;
+    float tabTemps[1000];
+    int i = 0;
 
-    t1 = clock();
+    printf("===== Test 1 (clé fixe) ====\n");
+    for (i = 0; i < 1000; i++){
+		t1 = clock();
+    	coll_search(i, &sip_hash_fix32);
+	    t2 = clock();
+	    tabTemps[i]= (float)(t2-t1)/CLOCKS_PER_SEC;
+    }
 
-    // le programme
+    min = max = moyenne = tabTemps[0];
 
-    t2 = clock();
-    temps = (float)(t2-t1)/CLOCKS_PER_SEC;
-    printf("temps = %f\n", temps);
+    for (i = 1; i < 1000; i++){
+		if (min > tabTemps[i])
+			min = tabTemps[i];
+		if (max < tabTemps[i])
+			max = tabTemps[i];
+		moyenne += tabTemps[i];
+    }
 
+    printf("temps min (clé fixe) = %f s\n", min);
+    printf("temps max (clé fixe) = %f s\n", max);
+    printf("temps moyen (clé fixe) = %f s\n", moyenne/1000);
+
+    printf("===== Test 2 (clé distincte) ====\n");
+    for (i = 0; i < 1000; i++){
+		t1 = clock();
+    	coll_search(i, &sip_hash_fix32);
+	    t2 = clock();
+	    tabTemps[i]= (float)(t2-t1)/CLOCKS_PER_SEC;
+    }
+
+    min = max = moyenne = tabTemps[0];
+
+    for (i = 1; i < 1000; i++){
+		if (min > tabTemps[i])
+			min = tabTemps[i];
+		if (max < tabTemps[i])
+			max = tabTemps[i];
+		moyenne += tabTemps[i];
+    }
+
+    printf("temps min (clé distincte) = %f s\n", min);
+    printf("temps max (clé distincte) = %f s\n", max);
+    printf("temps moyen (clé distincte) = %f s\n", moyenne/1000);
 }
 
 void question6(){
