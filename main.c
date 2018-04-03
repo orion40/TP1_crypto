@@ -5,8 +5,8 @@
 #include <cassert>
 #include <cstring>
 #include <cinttypes>
-
 #include <unordered_map>
+#include <time.h>
 
 #include <unistd.h>
 #include <endian.h>
@@ -244,7 +244,7 @@ void print_q4_result(int i, uint32_t result){
  *      -uint64_t 'out' input chiffré par twin_perm_z
  */
 uint64_t twine_perm_z(uint64_t input){
-    uint64_t rk = 0;
+    //uint64_t rk = 0;
     unsigned i, j, k, l;
     uint64_t out = 0;
 
@@ -270,6 +270,9 @@ uint64_t twine_perm_z(uint64_t input){
 
 void question1(){
     // TODO: peut-etre un probleme avec little/big endian
+    printf("\n=====================\n");
+    printf("===== Question 1 ====\n");
+
     uint64_t k[2] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};
     uint64_t k2[2] = {0, 0};
     uint8_t m[15] = {
@@ -278,9 +281,6 @@ void question1(){
     };
     uint8_t m2[8] = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7};
     uint64_t result;
-
-    printf("=====================\n");
-    printf("===== Question 1 ====\n");
 
     printf("===== Test 1 ====\n");
     result = siphash_2_4(k, m, 15);
@@ -310,11 +310,12 @@ void question1(){
 }
 
 void question3(){
+    printf("\n=====================\n");
+    printf("===== Question 3 ====\n");
+
     uint32_t k, m, result;
     uint32_t i;
     uint32_t max = 1000000;
-    printf("=====================\n");
-    printf("===== Question 3 ====\n");
 
     printf("SipHash32\n");
     for (i = 1; i < max; i*=10){
@@ -365,14 +366,26 @@ void question4(){
 }
 
 void question5(){
-    
+	printf("\n=====================\n");
+    printf("===== Question 5 ====\n");
+    float temps;
+    clock_t t1,t2;
+
+    t1 = clock();
+
+    // le programme
+
+    t2 = clock();
+    temps = (float)(t2-t1)/CLOCKS_PER_SEC;
+    printf("temps = %f\n", temps);
+
 }
 
 void question6(){
-    uint64_t input, result;
-
-    printf("=====================\n");
+    printf("\n=====================\n");
     printf("===== Question 6 ====\n");
+
+    uint64_t input, result;
 
     printf("===== Test 1 ====\n");
     input = 0x0000000000000000ULL;
@@ -402,7 +415,7 @@ int main(int argc, char** argv){
     question3();
     question4();
     question5();
-    question6();
+    //question6();
 
     return 1;
 }
