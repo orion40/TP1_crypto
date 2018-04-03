@@ -18,7 +18,7 @@
 #define COMPRESION_ROUNDS 2
 #define FINALIZATION_ROUNDS 4
 #define RAINBOW_PATH "./rainbow"
-#define NB_COLL_TEST 100
+#define NB_COLL_TEST 10
 
 /********************************
 *           PROTOTYPES          *
@@ -35,6 +35,7 @@ uint64_t twine_perm_z(uint64_t input);
 void question1();
 void question3();
 void question4();
+void question5();
 void question6();
 
 
@@ -353,22 +354,18 @@ void question3(){
 }
 
 void question4(){
-    uint32_t k1 = 0x03020100;
-    uint32_t k2 = 0x07060504;
-    uint32_t k3 = 0x0b0a0908;
-    uint32_t k4 = 0x0f0e0d0c;
     int i;
 
     printf("=====================\n");
     printf("===== Question 4 ====\n");
 
-    print_q4_result(1, coll_search(k1, &sip_hash_fix32));
-    print_q4_result(2, coll_search(k2, &sip_hash_fix32));
-    print_q4_result(3, coll_search(k3, &sip_hash_fix32));
-    print_q4_result(4, coll_search(k4, &sip_hash_fix32));
     for (i = 0; i < NB_COLL_TEST; i++){
         print_q4_result(i, coll_search(i, &sip_hash_fix32));
     }
+}
+
+void question5(){
+    
 }
 
 void question6(){
@@ -404,6 +401,7 @@ int main(int argc, char** argv){
     question1();
     question3();
     question4();
+    question5();
     question6();
 
     return 1;
