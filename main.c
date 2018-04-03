@@ -309,7 +309,7 @@ void print_q4_result(int i, uint32_t result){
  *      -uint64_t 'out' input chiffré par twin_perm_z
  */
 uint64_t twine_perm_z(uint64_t input){
-    uint64_t rk = 0;
+    //uint64_t rk = 0;
     unsigned i, j, k, l;
     uint64_t out = 0;
 
@@ -344,7 +344,7 @@ void question1(){
     uint8_t m2[8] = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7};
     uint64_t result;
 
-    printf("=====================\n");
+    printf("\n=====================\n");
     printf("===== Question 1 ====\n");
 
     printf("===== Test 1 ====\n");
@@ -378,7 +378,7 @@ void question3(){
     uint32_t k, m, result;
     uint32_t i;
     uint32_t max = 1000000;
-    printf("=====================\n");
+    printf("\n=====================\n");
     printf("===== Question 3 ====\n");
 
     printf("SipHash32\n");
@@ -425,7 +425,7 @@ void question4(){
     uint32_t k4 = 0x0f0e0d0c;
     int i;
 
-    printf("=====================\n");
+    printf("\n=====================\n");
     printf("===== Question 4 ====\n");
 
     print_q4_result(1, coll_search(k1, &sip_hash_fix32));
@@ -440,7 +440,7 @@ void question4(){
 void question6(){
     uint64_t input, result;
 
-    printf("=====================\n");
+    printf("\n=====================\n");
     printf("===== Question 6 ====\n");
 
     printf("===== Test 1 ====\n");
