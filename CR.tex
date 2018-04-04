@@ -1,37 +1,39 @@
 \documentclass[4apaper]{report}
 \RequirePackage{amsmath}
 
+\author{David Bozon, Franck Muraton}
+
 \begin{document}
+\title{Report for TP1 Cryptography}
+\maketitle
 
-Question 2 : Do you think that the key size of sip\_hash\_2\_4 is large enough to make an exhaustive search of the keyspace intractable? Can this function be considered to be collision-resistant?
+\paragraph{} This is the report of the lab work for the cryptography class. To use the project, compile using `make`, and launch using `./tp1`.
 
-Here, we have a $2^{128}$ key space. According to the first lesson of the class, if we want to be sure to have a result whitin 34 years ($2^{30}$ seconds), we'd need hardware with $2^{50}$ iterations per second, this should be trivially parallelizable, and each device should use 1000W without overhead.
+\paragraph{Question 2 : Do you think that the key size of sip\_hash\_2\_4 is large enough to make an exhaustive search of the keyspace intractable? Can this function be considered to be collision-resistant?}
+
+\paragraph{}Here, we have a $2^{128}$ key space. According to the first lesson of the class, if we want to be sure to have a result whitin 34 years ($2^{30}$ seconds), we'd need hardware with $2^{50}$ iterations per second, this should be trivially parallelizable, and each device should use 1000W without overhead.
 
 Which, still according to the lesson, mean that we need $2^{128-50-30}$, so $2^{48}$ machines, which is approximately 280 000 000 GW, about the output of 170 000 000 EPR nuclear power plants.
 
-For a fusion reactor outputting 1500 MWatt per second, this would require about 5 years of production. We just need to figure out fusion first.
+But for the collision, we have a problem. The Birthday paradox mean that we have a complexity of $2^{n/2}$, so here, we have 4294967296 possibilities, which is not too big for a supercomputer.
 
-Antimatter might be a solution, provided we can find better technology, and not have to spend about 63 trillions for a gram of antimatter. Then the energy would need to be harvested in some way too.
+\paragraph{Question 4 : When writing your report, be particularly careful when explaining your implementation
+choices for this question.}
 
-But for the collision, we have a problem. The Birthday paradox mean that we have a complexity of $2^{n/2}$, so here, we have 4294967296 possibilities, which is not that big.
-
-TODO: collision resistant ? Recalcule le bday paradox ici
-
-Question 4 :
-
-At first we tried a naive implementation : compute the hash every time, and compare them using a loop. Needless to say, as we are writing the report the loop is still running. This is not an efficient way to do.
+\paragraph{} At first we tried a naive implementation : compute the hash every time, and compare them using a loop. Needless to say, as we are writing the report the loop is still running. This is not an efficient way to do.
 
 We also tried pre-computing a hash table for a given key. The computing wasn't over and the table was over 20GB in size, and this was for ONE key.
 
-We then decided to try a smarter way of finding a collision, using the birthday paradox. The probability that one message has the same digest as another is of $\frac{1}{1/(2^{32} - 1}$. But as we add more message, we can start improving our chances of finding a collision. This mean that we will not have to compute every possible hash for a decent chance of finding a collision. If we compute $2^32-1$ messages, our chances are of $100\%$, according to the pingeon-hole principle (if you have $n$ cages, and $n+1$ pigeon, if you put a pigeon in every empty cage then you will need to have a cage with two pigeons in it).
+We then decided to try a smarter way of finding a collision, using the birthday paradox. The probability that one message has the same digest as another is of $\frac{1}{1/(2^{32} - 1)}$. But as we add more message, we can start improving our chances of finding a collision. This mean that we will not have to compute every possible hash for a decent chance of finding a collision. If we compute $2^{32}-1$ messages, our chances are of $100\%$, according to the pigeon-hole principle (if you have $n$ cages, and $n+1$ pigeon, if you put a pigeon in every empty cage then you will need to have a cage with two pigeons in it).
 
-The probability of someone sharing a birthday with someone else in a room of $n$ people is of $1 - (\frac {364}{365})^{\binom {n}{2}}$. Since we have $2^{32}-1$ possibilities here, the corresponding formula for our hash would be  $1 - (\frac {2^{32}-2}{2^{32}-1})^{\binom {n}{2}}$. For $2^{18}$ hash, the probability of having a collision is of $0.99966\%$ and with $2^{19}$, we have probability of $1$. This mean that we only need to compute $2^19$ hash to find a collision, which is much better than have to compute $2^{32}$ hashes.
+The probability of someone sharing a birthday with someone else in a room of $n$ people is of $1 - (\frac {364}{365})^{\binom {n}{2}}$. Since we have $2^{32}-1$ possibilities here, the corresponding formula for our hash would be  $1 - (\frac {2^{32}-2}{2^{32}-1})^{\binom {n}{2}}$. For $2^{18}$ hash, the probability of having a collision is of $0.99966\%$ and with $2^{19}$, we have probability of $1$. This mean that we only need to compute $2^{19}$ hash to find a collision, which is much better than have to compute $2^{32}$ hashes.
 
-Outputting that smaller raibow table result in a file that's about 11MB large, which can be held in memory. Computing such a table is very fast, and we are able to find a collision in less than a second. Interestingly, the collision is always found at the same place for different keys:
+We decided to use a C++ unordered\_map, which let us insert only unique keys, which are our hashes. If we happen to insert a key that already exist, we can know about it from the object being returned. So we just have to start building the table, and check for an insertion failure, which will indicate a collision. No extra search is required, and the rainbow table might not even have to be fully computed.
 
-We decided to use a C++ unordered_map, which let us insert only unique keys. If we happen to insert a key that already exist, we can know about it from the object being returned. So we just have to start building the table, and check for an insertionfailure, which will indicate a collision. No extra search is required, and the rainbow table might not even have to be fully computed.
+\paragraph{Question 5 : Gather statistics about the expected time (as a number of function calls) necessary to get a
+collision for sip\_hash\_fix32 "in counter mode" for a fixed key. In particular, give the average, minimum, and maximum time over 1000 (or more) distinct keys. Are these results consistant
+with your initial estimate?}
 
-Question 5 :
-
+\paragraph{} $2^{19}$ is the maximum function call that need to be done to have a guarentee of finding a collision. On average we need about 25 ms to find a collision, the maximum time required is about 112.022 ms and the minimum time required is about 0.182 ms, on a Intel(R) Core(TM) i5-3317U.
 
 \end{document}
