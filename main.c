@@ -350,7 +350,7 @@ void question5(){
             coll_search(rand, &sip_hash_fix32);
             t2 = clock();
             tabTemps[k]= (float)(t2-t1)/CLOCKS_PER_SEC;
-            rand = random();
+            rand++;
         }
 
         min = max = moyenne = tabTemps[0];
