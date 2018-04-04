@@ -233,16 +233,22 @@ void print_q4_result(int i, uint32_t result){
     printf("Results for %02d - 0x%" PRIx32 "\n", i, result);
 }
 
+
+/*
+ * Procedure twine_perm_z :
+ * Chiffre un message hexadecimal via twine
+ *  @ARG
+ *      - un uint64_t 'input' message à chiffrer
+ *  @RETURN
+ *      -uint64_t 'output' message chiffré
+ */
 uint64_t twine_perm_z(uint64_t input){
     uint8_t X[16], X_out[16];
     uint64_t output = 0;
+    int i;
     uint8_t SBox[16];
 
-    for (int i = 0; i < 16; i++)
-    {
-        X[i] = (input >> (4*i)) & 0xF;
-    }
-
+    // SBox rotation
     SBox[0] = 0xc;
     SBox[1] = 0x0;
     SBox[2] = 0xf;
@@ -260,28 +266,32 @@ uint64_t twine_perm_z(uint64_t input){
     SBox[14] = 0x6;
     SBox[15] = 0x4;
 
+    for (i = 0; i < 16; i++)
+        X[i] = (input >> (4*i)) & 0xF;
+
+    // Rotation des Pair
+    X_out[1] = X[2];
+    X_out[3] = X[6];
+    X_out[5] = X[0];
+    X_out[7] = X[4];
+    X_out[9] = X[10];
+    X_out[11] = X[14];
+    X_out[13] = X[8];
+    X_out[15] = X[12];
+
+    // Chiffrement des impaire
     X_out[0] = X[1] ^ SBox[X[0]];
     X_out[2] = X[11] ^ SBox[X[10]];
     X_out[4] = X[3] ^ SBox[X[2]];
     X_out[6] = X[9] ^ SBox[X[8]];
     X_out[8] = X[7] ^ SBox[X[6]];
-    X_out[0xa] = X[13] ^ SBox[X[12]];
-    X_out[0xc] = X[5] ^ SBox[X[4]];
-    X_out[0xe] = X[15] ^ SBox[X[14]];
+    X_out[10] = X[13] ^ SBox[X[12]];
+    X_out[12] = X[5] ^ SBox[X[4]];
+    X_out[14] = X[15] ^ SBox[X[14]];
 
-    X_out[1] = X[2];
-    X_out[3] = X[6];
-    X_out[5] = X[0];
-    X_out[7] = X[4];
-    X_out[9] = X[0xa];
-    X_out[0xb] = X[0xe];
-    X_out[0xd] = X[8];
-    X_out[0xf] = X[0xc];
-
-    for (int i = 0; i < 16; i++)
-    {
+    for (i = 0; i < 16; i++)
         output ^= (uint64_t)X_out[i] << (4*i);
-    }
+
     printf("OK - 0x%" PRIx64 "\n", output);
 
     return output;
@@ -412,9 +422,9 @@ void question5(){
         min = max = moyenne = tabTemps[0];
 
         for (k = 1; k < 1000; k++){
-#ifdef DEBUG
+	#ifdef DEBUG
             printf("t%d : %f   ",k, tabTemps[k]);
-#endif
+	#endif
             if (min > tabTemps[k])
                 min = tabTemps[k];
             if (max < tabTemps[k])
