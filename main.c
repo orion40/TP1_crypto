@@ -231,34 +231,6 @@ void print_q4_result(int i, uint32_t result){
     printf("Results for %02d - 0x%" PRIx32 "\n", i, result);
 }
 
-/*
- * Procedure twine_perm_z :
- * Effectue un chiffrement
- *  @ARG
- *      - un uint64_t 'input' entrée à chiffrer
- *  @RETURN
- *      -uint64_t 'out' input chiffré par twin_perm_z
- */
-uint64_t twine_perm_z(uint64_t input){
-    //uint64_t rk = 0;
-    unsigned i, j, k, l;
-    uint64_t out = 0;
-
-    for (i = 0; i < 36; i++){
-        for (j = 0; j < 8; j++){
-
-        }
-        for (k = 0; k < 16; k++){
-
-        }
-    }
-
-    for (l = 0; l < 8; l++){
-
-    }
-    return out;
-}
-
 /********************************
  *            QUESTIONS          *
  *********************************/
@@ -378,13 +350,15 @@ void question5(){
             coll_search(rand, &sip_hash_fix32);
             t2 = clock();
             tabTemps[k]= (float)(t2-t1)/CLOCKS_PER_SEC;
-            rand++;
+            rand = random();
         }
 
         min = max = moyenne = tabTemps[0];
 
         for (k = 1; k < 1000; k++){
+#ifdef DEBUG
             printf("t%d : %f   ",k, tabTemps[k]);
+#endif
             if (min > tabTemps[k])
                 min = tabTemps[k];
             if (max < tabTemps[k])
