@@ -32,13 +32,11 @@ uint64_t rotation_shift(const uint64_t value, int shift);
 uint32_t sip_hash_fix32(uint32_t k, uint32_t m);
 void sipround(uint64_t v[4]);
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
-uint64_t twine_perm_z(uint64_t input);
 
 void question1();
 void question3();
 void question4();
 void question5();
-void question6();
 
 /********************************
 *           FUNCTIONS           *
@@ -363,7 +361,7 @@ void question4(){
 }
 
 void question5(){
-	printf("\n=====================\n");
+    printf("\n=====================\n");
     printf("===== Question 5 ====\n");
 
     float min, max, moyenne;
@@ -374,55 +372,30 @@ void question5(){
     long int rand = random();
 
     for (i=1; i < 3; i++){
-	    printf("===== Test %d ====\n", i);
-	    for (k = 0; k < 1000; k++){
-			t1 = clock();
-	    	coll_search(rand, &sip_hash_fix32);
-		    t2 = clock();
-		    tabTemps[k]= (float)(t2-t1)/CLOCKS_PER_SEC;
-		    rand++;
-	    }
+        printf("===== Test %d ====\n", i);
+        for (k = 0; k < 1000; k++){
+            t1 = clock();
+            coll_search(rand, &sip_hash_fix32);
+            t2 = clock();
+            tabTemps[k]= (float)(t2-t1)/CLOCKS_PER_SEC;
+            rand++;
+        }
 
-	    min = max = moyenne = tabTemps[0];
+        min = max = moyenne = tabTemps[0];
 
-	    for (k = 1; k < 1000; k++){
-	    	printf("t%d : %f   ",k, tabTemps[k]);
-			if (min > tabTemps[k])
-				min = tabTemps[k];
-			if (max < tabTemps[k])
-				max = tabTemps[k];
-			moyenne += tabTemps[k];
-	    }
+        for (k = 1; k < 1000; k++){
+            printf("t%d : %f   ",k, tabTemps[k]);
+            if (min > tabTemps[k])
+                min = tabTemps[k];
+            if (max < tabTemps[k])
+                max = tabTemps[k];
+            moyenne += tabTemps[k];
+        }
 
-	    printf("temps min = %f s\n", min);
-	    printf("temps max = %f s\n", max);
-	    printf("temps moyen = %f s\n", moyenne/1000);
-	}
-}
-
-void question6(){
-    printf("\n=====================\n");
-    printf("===== Question 6 ====\n");
-
-    uint64_t input, result;
-
-    printf("===== Test 1 ====\n");
-    input = 0x0000000000000000ULL;
-    result = twine_perm_z(input);
-    assert(result == 0xb0049660a2858d43);
-    printf("OK - 0x%" PRIx64 "\n", result);
-
-    printf("===== Test 2 ====\n");
-    input = 0x123456789abcdef1ULL;
-    result = twine_perm_z(input);
-    assert(result == 0x00de04856ecd7ad0);
-    printf("OK - 0x%" PRIx64 "\n", result);
-
-    printf("===== Test 3 ====\n");
-    input = 0xb4329ed38453aac8ULL;
-    result = twine_perm_z(input);
-    assert(result == 0xd0790f39b4d2ecab);
-    printf("OK - 0x%" PRIx64 "\n", result);
+        printf("temps min = %f s\n", min);
+        printf("temps max = %f s\n", max);
+        printf("temps moyen = %f s\n", moyenne/1000);
+    }
 }
 
 /********************************
@@ -434,7 +407,6 @@ int main(int argc, char** argv){
     question3();
     question4();
     question5(); // Long ...
-    //question6();
 
     return 1;
 }
