@@ -36,4 +36,9 @@ with your initial estimate?}
 
 \paragraph{} $2^{19}$ is the maximum function call that need to be done to have a guarentee of finding a collision. On average we need about 25 ms to find a collision, the maximum time required is about 112.022 ms and the minimum time required is about 0.182 ms, on a Intel(R) Core(TM) i5-3317U.
 
+\paragraph{Question 8: Do you think that the key size of twine\_fun1 is large enough to make an exhaustive search of
+the keyspace intractable? Can this function be considered to be collision-resistant?}
+
+\paragraph{} Here, we have $2^{32}$ key possibilities, which is far less than what we had for siphash. An exhaustive search is indeed possible, as computing $2^{32}$ twine\_fun1 on the same machine as question 5 takes less than 5 seconds. The complexity of computing a collision is of $2^{n/2}$, which mean that it is trivial in our case ($2^{16}$).
+
 \end{document}
