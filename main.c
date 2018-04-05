@@ -235,6 +235,15 @@ void print_q4_result(int i, uint32_t result){
     printf("Results for %02d - 0x%" PRIx32 "\n", i, result);
 }
 
+
+/*
+ * Procedure twine_perm_z :
+ * Chiffre un message hexadecimal via twine
+ *  @ARG
+ *      - un uint64_t 'input' message à chiffrer
+ *  @RETURN
+ *      -uint64_t 'output' message chiffré
+ */
 uint64_t twine_perm_z(uint64_t input){
     uint8_t X[36][16];
     uint64_t output = 0;
@@ -413,9 +422,9 @@ void question5(){
         min = max = moyenne = tabTemps[0];
 
         for (k = 1; k < 1000; k++){
-#ifdef DEBUG
+	#ifdef DEBUG
             printf("t%d : %f   ",k, tabTemps[k]);
-#endif
+	#endif
             if (min > tabTemps[k])
                 min = tabTemps[k];
             if (max < tabTemps[k])
