@@ -41,6 +41,7 @@ void question4();
 void question5();
 void question6();
 void question7();
+void question9();
 
 /********************************
 *           FUNCTIONS           *
@@ -206,10 +207,7 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
  *			le même résultat.
  */
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
-    uint32_t max;
-
-    max = 2<<19;
-
+    uint32_t max = 2<<19;
     std::unordered_map<uint32_t, uint32_t> hashmap;
 
     //puts("Computing rainbow table & checking for collisions...");
@@ -237,7 +235,7 @@ void print_q4_result(int i, uint32_t result){
 
 
 /*
- * Procedure twine_perm_z :
+ * Fonction twine_perm_z :
  * Chiffre un message hexadecimal via twine
  *  @ARG
  *      - un uint64_t 'input' message à chiffrer
@@ -248,11 +246,6 @@ uint64_t twine_perm_z(uint64_t input){
     uint8_t X[36][16];
     uint64_t output = 0;
     uint8_t SBox[16], pi[16];
-
-    for (int i = 0; i < 16; i++)
-    {
-        X[0][i] = (input >> (4*i)) & 0xF;
-    }
 
     // Tables de permutation
     SBox[0] = 0xc;    SBox[1] = 0x0;    SBox[2] = 0xf;
@@ -269,6 +262,11 @@ uint64_t twine_perm_z(uint64_t input){
     pi[9] = 6;    pi[10] = 9;   pi[11] = 2;
     pi[12] = 15;  pi[13] = 10;  pi[14] = 11;
     pi[15] = 14;
+
+    for (int i = 0; i < 16; i++)
+    {
+        X[0][i] = (input >> (4*i)) & 0xF;
+    }
 
     for (int i = 0; i < 35; i++){
         for (int j = 0; j < 8; j++){
@@ -290,6 +288,15 @@ uint64_t twine_perm_z(uint64_t input){
     return output;
 }
 
+/*
+ * Fonction twine_fun1 :
+ * Chiffre un message via twine_perm_z
+ *  @ARG
+ *      - un uint32_t 'k' clé de chiffrement
+ *		- un uint32_t 'm' message à chiffrer
+ *  @RETURN
+ *      -uint32_t 'output' message chiffré
+ */
 uint32_t twine_fun1(uint32_t k, uint32_t m){
     uint64_t input = 0;
     input ^= ((uint64_t)k << 32) ^ m;
@@ -405,31 +412,32 @@ void question5(){
     float min, max, moyenne;
     clock_t t1,t2;
     float tabTemps[1000];
-    int i, k;
+    int i, j;
     srandom(time(0));
-    long int rand = random();
+    uint32_t k = (uint32_t) random(); // distinct key k
 
     for (i=1; i < 3; i++){
         printf("===== Test %d ====\n", i);
-        for (k = 0; k < 1000; k++){
+        for (j = 0; j < 1000; j++){
             t1 = clock();
-            coll_search(rand, &sip_hash_fix32);
+            coll_search(k, &sip_hash_fix32);
             t2 = clock();
-            tabTemps[k]= (float)(t2-t1)/CLOCKS_PER_SEC;
-            rand++;
+            tabTemps[j]= (float)(t2-t1)/CLOCKS_PER_SEC;
+            k++;
         }
 
         min = max = moyenne = tabTemps[0];
 
-        for (k = 1; k < 1000; k++){
-	#ifdef DEBUG
-            printf("t%d : %f   ",k, tabTemps[k]);
-	#endif
-            if (min > tabTemps[k])
-                min = tabTemps[k];
-            if (max < tabTemps[k])
-                max = tabTemps[k];
-            moyenne += tabTemps[k];
+        for (j = 1; j < 1000; j++){
+			#ifdef DEBUG
+            printf("t%d : %f   ",j, tabTemps[j]);
+			#endif
+
+            if (min > tabTemps[j])
+                min = tabTemps[j];
+            if (max < tabTemps[j])
+                max = tabTemps[j];
+            moyenne += tabTemps[j];
         }
 
         printf("temps min = %f s\n", min);
@@ -478,6 +486,49 @@ void question7(){
     printf("OK - 0x%" PRIx32 "\n", result);
 }
 
+void question9(){
+    printf("\n=====================\n");
+    printf("===== Question 9 ====\n");
+
+    float min, max, moyenne;
+    clock_t t1,t2;
+    float tabTemps[1000];
+    int i, j;
+	uint32_t k = 0xabcd; // fixed key
+
+    for (i=1; i < 3; i++){
+        printf("===== Test %d ====\n", i);
+        for (j = 0; j < 1000; j++){
+            t1 = clock();
+            coll_search(k, &twine_fun1);
+            t2 = clock();
+            tabTemps[j]= (float)(t2-t1)/CLOCKS_PER_SEC;
+        }
+
+        min = max = moyenne = tabTemps[0];
+
+        for (j = 1; j < 1000; j++){
+			#ifdef DEBUG
+            printf("t%d : %f   ",j, tabTemps[j]);
+			#endif
+
+            if (min > tabTemps[j])
+                min = tabTemps[j];
+            if (max < tabTemps[j])
+                max = tabTemps[j];
+            moyenne += tabTemps[j];
+        }
+
+        printf("temps min = %f s\n", min);
+        printf("temps max = %f s\n", max);
+        printf("temps moyen = %f s\n", moyenne/1000);
+
+        k++;
+    }
+}
+
+
+
 /********************************
  *             MAIN              *
  *********************************/
@@ -489,6 +540,7 @@ int main(int argc, char** argv){
     //question5(); // Long ...
     question6();
     question7();
+    question9(); // Long ...
 
     return 1;
 }
