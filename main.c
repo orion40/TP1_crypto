@@ -33,12 +33,14 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m);
 void sipround(uint64_t v[4]);
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
 uint64_t twine_perm_z(uint64_t input);
+uint32_t twine_fun1(uint32_t k, uint32_t m);
 
 void question1();
 void question3();
 void question4();
 void question5();
 void question6();
+void question7();
 
 /********************************
 *           FUNCTIONS           *
@@ -234,57 +236,56 @@ void print_q4_result(int i, uint32_t result){
 }
 
 uint64_t twine_perm_z(uint64_t input){
-    uint8_t X[16], X_out[16];
+    uint8_t X[36][16];
     uint64_t output = 0;
-    uint8_t SBox[16];
+    uint8_t SBox[16], pi[16];
 
     for (int i = 0; i < 16; i++)
     {
-        X[i] = (input >> (4*i)) & 0xF;
+        X[0][i] = (input >> (4*i)) & 0xF;
     }
 
-    SBox[0] = 0xc;
-    SBox[1] = 0x0;
-    SBox[2] = 0xf;
-    SBox[3] = 0xa;
-    SBox[4] = 0x2;
-    SBox[5] = 0xb;
-    SBox[6] = 0x9;
-    SBox[7] = 0x5;
-    SBox[8] = 0x8;
-    SBox[9] = 0x3;
-    SBox[10] = 0xd;
-    SBox[11] = 0x7;
-    SBox[12] = 0x1;
-    SBox[13] = 0xe;
-    SBox[14] = 0x6;
+    // Tables de permutation
+    SBox[0] = 0xc;    SBox[1] = 0x0;    SBox[2] = 0xf;
+    SBox[3] = 0xa;    SBox[4] = 0x2;    SBox[5] = 0xb;
+    SBox[6] = 0x9;    SBox[7] = 0x5;    SBox[8] = 0x8;
+    SBox[9] = 0x3;    SBox[10] = 0xd;   SBox[11] = 0x7;
+    SBox[12] = 0x1;   SBox[13] = 0xe;   SBox[14] = 0x6;
     SBox[15] = 0x4;
 
-    X_out[0] = X[1] ^ SBox[X[0]];
-    X_out[2] = X[11] ^ SBox[X[10]];
-    X_out[4] = X[3] ^ SBox[X[2]];
-    X_out[6] = X[9] ^ SBox[X[8]];
-    X_out[8] = X[7] ^ SBox[X[6]];
-    X_out[0xa] = X[13] ^ SBox[X[12]];
-    X_out[0xc] = X[5] ^ SBox[X[4]];
-    X_out[0xe] = X[15] ^ SBox[X[14]];
+    // Tables de permutation
+    pi[0] = 5;    pi[1] = 0;    pi[2] = 1;
+    pi[3] = 4;    pi[4] = 7;    pi[5] = 12;
+    pi[6] = 3;    pi[7] = 8;    pi[8] = 13;
+    pi[9] = 6;    pi[10] = 9;   pi[11] = 2;
+    pi[12] = 15;  pi[13] = 10;  pi[14] = 11;
+    pi[15] = 14;
 
-    X_out[1] = X[2];
-    X_out[3] = X[6];
-    X_out[5] = X[0];
-    X_out[7] = X[4];
-    X_out[9] = X[0xa];
-    X_out[0xb] = X[0xe];
-    X_out[0xd] = X[8];
-    X_out[0xf] = X[0xc];
+    for (int i = 0; i < 35; i++){
+        for (int j = 0; j < 8; j++){
+            X[i][2*j + 1] = SBox[X[i][2 * j]] ^ X[i][2*j+1];
+        }
+        for (int h = 0; h < 16; h++){
+            X[i+1][pi[h]] = X[i][h];
+        }
+    }
+    for (int j = 0; j < 8; j++){
+        X[35][2*j+1] = SBox[X[35][2*j]] ^ X[35][2*j+1];
+    }
 
     for (int i = 0; i < 16; i++)
     {
-        output ^= (uint64_t)X_out[i] << (4*i);
+        output ^= (uint64_t)X[35][i] << (4*i);
     }
-    printf("OK - 0x%" PRIx64 "\n", output);
 
     return output;
+}
+
+uint32_t twine_fun1(uint32_t k, uint32_t m){
+    uint64_t input = 0;
+    input ^= ((uint64_t)k << 32) ^ m;
+
+    return (uint32_t) twine_perm_z(input);
 }
 
 /********************************
@@ -437,20 +438,35 @@ void question6(){
     printf("===== Test 1 ====\n");
     input = 0x0000000000000000ULL;
     result = twine_perm_z(input);
-    assert(result == 0xb0049660a2858d43);
+    assert(result == 0xc0c0c0c0c0c0c0c0);
     printf("OK - 0x%" PRIx64 "\n", result);
 
     printf("===== Test 2 ====\n");
     input = 0x123456789abcdef1ULL;
     result = twine_perm_z(input);
-    assert(result == 0x00de04856ecd7ad0);
+    assert(result == 0xb4e946d9ad8f7b29);
     printf("OK - 0x%" PRIx64 "\n", result);
 
     printf("===== Test 3 ====\n");
     input = 0xb4329ed38453aac8ULL;
     result = twine_perm_z(input);
-    assert(result == 0xd0790f39b4d2ecab);
+    assert(result == 0x784f5613309457d8);
     printf("OK - 0x%" PRIx64 "\n", result);
+}
+
+void question7(){
+    printf("\n=====================\n");
+    printf("===== Question 7 ====\n");
+
+    uint32_t result;
+
+    result = twine_fun1(0x00000000, 0x00000000);
+    assert(result == 0xc0c0c0c0);
+    printf("OK - 0x%" PRIx32 "\n", result);
+
+    result = twine_fun1(0xcdef1234, 0xab123478);
+    assert(result == 0x6465886c);
+    printf("OK - 0x%" PRIx32 "\n", result);
 }
 
 /********************************
@@ -463,6 +479,7 @@ int main(int argc, char** argv){
     //question4();
     //question5(); // Long ...
     question6();
+    question7();
 
     return 1;
 }
