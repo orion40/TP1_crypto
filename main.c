@@ -44,6 +44,7 @@ void question4();
 void question5();
 void question6();
 void question7();
+void question9();
 void question10();
 
 /********************************
@@ -210,10 +211,7 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
  *			le même résultat.
  */
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
-    uint32_t max;
-
-    max = 2<<19;
-
+    uint32_t max = 2<<19;
     std::unordered_map<uint32_t, uint32_t> hashmap;
 
     //puts("Computing rainbow table & checking for collisions...");
@@ -241,7 +239,7 @@ void print_q4_result(int i, uint32_t result){
 
 
 /*
- * Procedure twine_perm_z :
+ * Fonction twine_perm_z :
  * Chiffre un message hexadecimal via twine
  *  @ARG
  *      - un uint64_t 'input' message à chiffrer
@@ -252,11 +250,6 @@ uint64_t twine_perm_z(uint64_t input){
     uint8_t X[36][16];
     uint64_t output = 0;
     uint8_t SBox[16], pi[16];
-
-    for (int i = 0; i < 16; i++)
-    {
-        X[0][i] = (input >> (4*i)) & 0xF;
-    }
 
     // Tables de permutation
     SBox[0] = 0xc;    SBox[1] = 0x0;    SBox[2] = 0xf;
@@ -273,6 +266,11 @@ uint64_t twine_perm_z(uint64_t input){
     pi[9] = 6;    pi[10] = 9;   pi[11] = 2;
     pi[12] = 15;  pi[13] = 10;  pi[14] = 11;
     pi[15] = 14;
+
+    for (int i = 0; i < 16; i++)
+    {
+        X[0][i] = (input >> (4*i)) & 0xF;
+    }
 
     for (int i = 0; i < 35; i++){
         for (int j = 0; j < 8; j++){
@@ -294,12 +292,27 @@ uint64_t twine_perm_z(uint64_t input){
     return output;
 }
 
+/*
+ * Fonction twine_fun1 :
+ * Chiffre un message via twine_perm_z
+ *  @ARG
+ *      - un uint32_t 'k' clé de chiffrement
+ *		- un uint32_t 'm' message à chiffrer
+ *  @RETURN
+ *      -uint32_t 'output' message chiffré
+ */
 uint32_t twine_fun1(uint32_t k, uint32_t m){
     return (uint32_t) twine_perm_z(((uint64_t)k << 32) ^ m);
 }
 
 uint32_t twine_fun2(uint32_t k, uint16_t *m, unsigned mlen){
-    return twine_fun1(k, (0xFFFF << 16) ^ m[0]);
+    unsigned int i;
+    uint32_t result = twine_fun1(k, (0xFFFF << 16) ^ m[0]);
+    for (i = 1; i < mlen; i++){
+        result = twine_fun1(k, (result << 16) ^ m[i]);
+    }
+
+    return result;
 }
 
 uint32_t twine_fun2_fix32(uint32_t k, uint32_t m){
@@ -321,8 +334,8 @@ uint32_t twine_fun2_fix16(uint32_t k, uint32_t m){
 
 void question1(){
     // TODO: peut-etre un probleme avec little/big endian
-    printf("\n=====================\n");
-    printf("===== Question 1 ====\n");
+    printf("\n====================\n");
+    printf("==== Question 1 ====\n");
 
     uint64_t k[2] = {0x0706050403020100, 0x0f0e0d0c0b0a0908};
     uint64_t k2[2] = {0, 0};
@@ -333,27 +346,27 @@ void question1(){
     uint8_t m2[8] = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7};
     uint64_t result;
 
-    printf("===== Test 1 ====\n");
+    printf("==== Test 1 ====\n");
     result = siphash_2_4(k, m, 15);
     assert(result == 0xa129ca6149be45e5);
     printf("OK - 0x%" PRIx64 "\n", result);
 
-    printf("===== Test 2 ====\n");
+    printf("==== Test 2 ====\n");
     result = siphash_2_4(k, m2, 8);
     assert(result == 0x93f5f5799a932462);
     printf("OK - 0x%" PRIx64 "\n", result);
 
-    printf("===== Test 3 ====\n");
+    printf("==== Test 3 ====\n");
     result = siphash_2_4(k, NULL, 0);
     assert(result == 0x726fdb47dd0e0e31);
     printf("OK - 0x%" PRIx64 "\n", result);
 
-    printf("===== Test 4 ====\n");
+    printf("==== Test 4 ====\n");
     result = siphash_2_4(k2, NULL, 0);
     assert(result == 0x1e924b9d737700d7);
     printf("OK - 0x%" PRIx64 "\n", result);
 
-    printf("===== More Tests ====\n");
+    printf("==== More Tests ====\n");
     result = siphash_2_4(k2, m, 15);
     printf("0x%" PRIx64 "\n", result);
     result = siphash_2_4(k2, m2, 15);
@@ -362,15 +375,15 @@ void question1(){
 
 void question3(){
     printf("\n=====================\n");
-    printf("===== Question 3 ====\n");
+    printf("==== Question 3 ====\n");
 
     uint32_t k, m, result;
-    uint32_t i;
     uint32_t max = 1000000;
+    register uint32_t i;
 
     printf("SipHash32\n");
     for (i = 1; i < max; i*=10){
-        printf("===== Test %d ====\n", i);
+        printf("==== Test %d ====\n", i);
         k = 0;
         m = i;
         result = sip_hash_fix32(k, m);
@@ -379,25 +392,25 @@ void question3(){
 
     m = 0;
 
-    printf("===== Test %d ====\n", i + 1);
+    printf("==== Test %d ====\n", i + 1);
     k = 0x03020100;
     result = sip_hash_fix32(k, m);
     printf("OK - 0x%" PRIx32 "\n", result);
-    printf("===== Test %d ====\n", i + 2);
+    printf("==== Test %d ====\n", i + 2);
     k = 0x07060504;
     result = sip_hash_fix32(k, m);
     printf("OK - 0x%" PRIx32 "\n", result);
-    printf("===== Test %d ====\n", i + 3);
+    printf("==== Test %d ====\n", i + 3);
     k = 0x0b0a0908;
     result = sip_hash_fix32(k, m);
     printf("OK - 0x%" PRIx32 "\n", result);
-    printf("===== Test %d ====\n", i + 4);
+    printf("==== Test %d ====\n", i + 4);
     k = 0x0f0e0d0c;
     result = sip_hash_fix32(k, m);
     printf("OK - 0x%" PRIx32 "\n", result);
 
     /*
-       printf("===== Test 4 ====\n");
+       printf("==== Test 4 ====\n");
        k = 0x03020100;
        m = 0x03020100;
        result = sip_hash_fix32(k, m);
@@ -407,7 +420,7 @@ void question3(){
 
 void question4(){
     printf("\n=====================\n");
-    printf("===== Question 4 ====\n");
+    printf("==== Question 4 ====\n");
 
     int i;
 
@@ -418,36 +431,38 @@ void question4(){
 
 void question5(){
     printf("\n=====================\n");
-    printf("===== Question 5 ====\n");
+    printf("==== Question 5 ====\n");
 
     float min, max, moyenne;
     clock_t t1,t2;
     float tabTemps[1000];
-    int i, k;
+    int i;
+    register int j;
     srandom(time(0));
-    long int rand = random();
+    uint32_t k = (uint32_t) random(); // distinct key k
 
     for (i=1; i < 3; i++){
-        printf("===== Test %d ====\n", i);
-        for (k = 0; k < 1000; k++){
+        printf("==== Test %d ====\n", i);
+        for (j = 0; j < 1000; j++){
             t1 = clock();
-            coll_search(rand, &sip_hash_fix32);
+            coll_search(k, &sip_hash_fix32);
             t2 = clock();
-            tabTemps[k]= (float)(t2-t1)/CLOCKS_PER_SEC;
-            rand++;
+            tabTemps[j]= (float)(t2-t1)/CLOCKS_PER_SEC;
+            k++;
         }
 
         min = max = moyenne = tabTemps[0];
 
-        for (k = 1; k < 1000; k++){
+        for (j = 1; j < 1000; j++){
 #ifdef DEBUG
-            printf("t%d : %f   ",k, tabTemps[k]);
+            printf("t%d : %f   ",j, tabTemps[j]);
 #endif
-            if (min > tabTemps[k])
-                min = tabTemps[k];
-            if (max < tabTemps[k])
-                max = tabTemps[k];
-            moyenne += tabTemps[k];
+
+            if (min > tabTemps[j])
+                min = tabTemps[j];
+            if (max < tabTemps[j])
+                max = tabTemps[j];
+            moyenne += tabTemps[j];
         }
 
         printf("temps min = %f s\n", min);
@@ -458,23 +473,23 @@ void question5(){
 
 void question6(){
     printf("\n=====================\n");
-    printf("===== Question 6 ====\n");
+    printf("==== Question 6 ====\n");
 
     uint64_t input, result;
 
-    printf("===== Test 1 ====\n");
+    printf("==== Test 1 ====\n");
     input = 0x0000000000000000ULL;
     result = twine_perm_z(input);
     assert(result == 0xc0c0c0c0c0c0c0c0);
     printf("OK - 0x%" PRIx64 "\n", result);
 
-    printf("===== Test 2 ====\n");
+    printf("==== Test 2 ====\n");
     input = 0x123456789abcdef1ULL;
     result = twine_perm_z(input);
     assert(result == 0xb4e946d9ad8f7b29);
     printf("OK - 0x%" PRIx64 "\n", result);
 
-    printf("===== Test 3 ====\n");
+    printf("==== Test 3 ====\n");
     input = 0xb4329ed38453aac8ULL;
     result = twine_perm_z(input);
     assert(result == 0x784f5613309457d8);
@@ -483,7 +498,7 @@ void question6(){
 
 void question7(){
     printf("\n=====================\n");
-    printf("===== Question 7 ====\n");
+    printf("==== Question 7 ====\n");
 
     uint32_t result;
 
@@ -496,24 +511,78 @@ void question7(){
     printf("OK - 0x%" PRIx32 "\n", result);
 }
 
+void question9(){
+    printf("\n=====================\n");
+    printf("==== Question 9 ====\n");
+
+    float min, max, moyenne;
+    clock_t t1,t2;
+    float tabTemps[1000];
+    int i;
+    register int j;
+    uint32_t k = 0xabcd; // fixed key
+
+    for (i=1; i < 3; i++){
+        printf("==== Test %d ====\n", i);
+        for (j = 0; j < 1000; j++){
+            t1 = clock();
+            coll_search(k, &twine_fun1);
+            t2 = clock();
+            tabTemps[j]= (float)(t2-t1)/CLOCKS_PER_SEC;
+        }
+
+        min = max = moyenne = tabTemps[0];
+
+        for (j = 1; j < 1000; j++){
+#ifdef DEBUG
+            printf("t%d : %f   ",j, tabTemps[j]);
+#endif
+
+            if (min > tabTemps[j])
+                min = tabTemps[j];
+            if (max < tabTemps[j])
+                max = tabTemps[j];
+            moyenne += tabTemps[j];
+        }
+
+        printf("temps min = %f s\n", min);
+        printf("temps max = %f s\n", max);
+        printf("temps moyen = %f s\n", moyenne/1000);
+
+        k++;
+    }
+}
+
 void question10(){
     printf("\n=====================\n");
-    printf("===== Question 10 ====\n");
+    printf("==== Question 10 ====\n");
 
     uint32_t result;
     uint16_t m1[1] = {0x67FC};
+    uint32_t m1_16 = 0x67FC;
     uint16_t m2[2] = {0xEF12, 0x5678};
+    uint32_t m2_32 = 0xEF125678;
     uint16_t m3[4] = {0xEF12, 0x5678, 0x31AA, 0x7123};
 
     result = twine_fun2(0x00000000, m1, 1);
     assert(result == 0xc57c8cbc);
-    printf("OK - 0x%" PRIx32 "\n", result);
+    printf("OK twine_fun2 - 0x%" PRIx32 "\n", result);
+
+    result = twine_fun2_fix16(0x00000000, m1_16);
+    assert(result == 0xc57c8cbc);
+    printf("OK twine_fun2_fix16 - 0x%" PRIx32 "\n", result);
+
     result = twine_fun2(0x23AE90FF, m2, 2);
     assert(result == 0xab8e124f);
-    printf("OK - 0x%" PRIx32 "\n", result);
+    printf("OK twine_fun2 - 0x%" PRIx32 "\n", result);
+
+    result = twine_fun2_fix32(0x23AE90FF, m2_32);
+    assert(result == 0xab8e124f);
+    printf("OK twine_fun2_fix32 - 0x%" PRIx32 "\n", result);
+
     result = twine_fun2(0xEEEEEEEE, m3, 4);
     assert(result == 0x9941a493);
-    printf("OK - 0x%" PRIx32 "\n", result);
+    printf("OK twine_fun2 - 0x%" PRIx32 "\n", result);
 }
 
 void usage(char* name){
@@ -543,6 +612,9 @@ int main(int argc, char** argv){
             question6();
             question7();
             question10();
+        } else if (strcmp(argv[1], "--question9") == 0){
+            puts("Question 9 - please wait a few seconds, we are looking for a thousand collision...");
+            question9();
         } else {
             usage(argv[0]);
         }
