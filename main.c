@@ -34,6 +34,9 @@ void sipround(uint64_t v[4]);
 uint64_t siphash_2_4(uint64_t k[2], uint8_t *m, unsigned mlen);
 uint64_t twine_perm_z(uint64_t input);
 uint32_t twine_fun1(uint32_t k, uint32_t m);
+uint32_t twine_fun2(uint32_t k, uint16_t *m, unsigned mlen);
+uint32_t twine_fun2_fix32(uint32_t k, uint32_t m);
+uint32_t twine_fun2_fix16(uint32_t k, uint32_t m);
 
 void question1();
 void question3();
@@ -41,10 +44,11 @@ void question4();
 void question5();
 void question6();
 void question7();
+void question10();
 
 /********************************
-*           FUNCTIONS           *
-*********************************/
+ *           FUNCTIONS           *
+ *********************************/
 
 /*
  * Procedure print_internal_state :
@@ -195,7 +199,7 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
 
 /*
  * Fonction coll_search :
- * Effectue une recherche de colission (recherche 2 résultats égaux
+ * Effectue une recherche de colision (recherche 2 résultats égaux
  *	pour 2 indices de la function fun avec une clé 'k')
  *  @ARG
  *      - un uint32_t 'k' cle de 32 bits
@@ -215,7 +219,7 @@ uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
     //puts("Computing rainbow table & checking for collisions...");
     for (uint32_t i = 0; i < max; i++){
         std::pair<std::unordered_map<uint32_t, uint32_t>::iterator, bool > result;
-        result = hashmap.insert({fun(i,k), i});
+        result = hashmap.insert({fun(k,i), i});
         if (result.second == false)
             return i;
     }
@@ -291,10 +295,24 @@ uint64_t twine_perm_z(uint64_t input){
 }
 
 uint32_t twine_fun1(uint32_t k, uint32_t m){
-    uint64_t input = 0;
-    input ^= ((uint64_t)k << 32) ^ m;
+    return (uint32_t) twine_perm_z(((uint64_t)k << 32) ^ m);
+}
 
-    return (uint32_t) twine_perm_z(input);
+uint32_t twine_fun2(uint32_t k, uint16_t *m, unsigned mlen){
+    return twine_fun1(k, (0xFFFF << 16) ^ m[0]);
+}
+
+uint32_t twine_fun2_fix32(uint32_t k, uint32_t m){
+    uint16_t message[2];
+    message[0] = m >> 16;
+    message[1] = m;
+    return twine_fun2(k, message, 2);
+}
+
+uint32_t twine_fun2_fix16(uint32_t k, uint32_t m){
+    uint16_t message[1];
+    message[0] = m;
+    return twine_fun2(k, message, 1);
 }
 
 /********************************
@@ -422,9 +440,9 @@ void question5(){
         min = max = moyenne = tabTemps[0];
 
         for (k = 1; k < 1000; k++){
-	#ifdef DEBUG
+#ifdef DEBUG
             printf("t%d : %f   ",k, tabTemps[k]);
-	#endif
+#endif
             if (min > tabTemps[k])
                 min = tabTemps[k];
             if (max < tabTemps[k])
@@ -478,17 +496,57 @@ void question7(){
     printf("OK - 0x%" PRIx32 "\n", result);
 }
 
+void question10(){
+    printf("\n=====================\n");
+    printf("===== Question 10 ====\n");
+
+    uint32_t result;
+    uint16_t m1[1] = {0x67FC};
+    uint16_t m2[2] = {0xEF12, 0x5678};
+    uint16_t m3[4] = {0xEF12, 0x5678, 0x31AA, 0x7123};
+
+    result = twine_fun2(0x00000000, m1, 1);
+    assert(result == 0xc57c8cbc);
+    printf("OK - 0x%" PRIx32 "\n", result);
+    result = twine_fun2(0x23AE90FF, m2, 2);
+    assert(result == 0xab8e124f);
+    printf("OK - 0x%" PRIx32 "\n", result);
+    result = twine_fun2(0xEEEEEEEE, m3, 4);
+    assert(result == 0x9941a493);
+    printf("OK - 0x%" PRIx32 "\n", result);
+}
+
+void usage(char* name){
+    printf("Usage: %s <args>\n", name);
+    puts("\t--part1\t\tPrint first part questions (excluding question 5).");
+    puts("\t--question5\tPrint question 5, which take a bit of time.");
+    puts("\t--part2\t\tPrint the second part questions.");
+}
+
 /********************************
  *             MAIN              *
  *********************************/
 
 int main(int argc, char** argv){
-    //question1();
-    //question3();
-    //question4();
-    //question5(); // Long ...
-    question6();
-    question7();
+    if (argc < 2){
+        usage(argv[0]);
+    } else {
+        if (strcmp(argv[1], "--part1") == 0){
+            puts("First questions of part 1...");
+            question1();
+            question3();
+            question4();
+        } else if (strcmp(argv[1], "--question5") == 0){
+            puts("Question 5 - please wait a few seconds, we are looking for a thousand collision...");
+            question5();
+        } else if (strcmp(argv[1], "--part2") == 0){
+            question6();
+            question7();
+            question10();
+        } else {
+            usage(argv[0]);
+        }
+    }
 
-    return 1;
+    return 0;
 }
