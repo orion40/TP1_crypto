@@ -7,9 +7,9 @@
 \title{Report for TP1 Cryptography}
 \maketitle
 
-\paragraph{} This is the report of the lab work for the cryptography class. To use the project, compile using `make`, and launch using `./tp1`.
+\paragraph{Instructions: \\} This is the report of the lab work for the cryptography class. To use the project, compile using \texttt{make}, and launch with an argument using '\texttt{./tp1}'. The available arguments are '\texttt{--part1}' which use the functions of part 1, except question 5; '\texttt{--question5}' which does the question 5 (which takes a while to be done, less than a minute), and finally '\texttt{--part2}', which use the functions of part 2. For exemple: \texttt{make \&\& ./tp1 --part1}.
 
-\paragraph{Question 2 : Do you think that the key size of sip\_hash\_2\_4 is large enough to make an exhaustive search of the keyspace intractable? Can this function be considered to be collision-resistant?}
+\paragraph{Question 2 : Do you think that the key size of \texttt{sip\_hash\_2\_4} is large enough to make an exhaustive search of the keyspace intractable? Can this function be considered to be collision-resistant?}
 
 \paragraph{}Here, we have a $2^{128}$ key space. According to the first lesson of the class, if we want to be sure to have a result whitin 34 years ($2^{30}$ seconds), we'd need hardware with $2^{50}$ iterations per second, this should be trivially parallelizable, and each device should use 1000W without overhead.
 
@@ -28,10 +28,10 @@ We then decided to try a smarter way of finding a collision, using the birthday 
 
 The probability of someone sharing a birthday with someone else in a room of $n$ people is of $1 - (\frac {364}{365})^{\binom {n}{2}}$. Since we have $2^{32}-1$ possibilities here, the corresponding formula for our hash would be  $1 - (\frac {2^{32}-2}{2^{32}-1})^{\binom {n}{2}}$. For $2^{18}$ hash, the probability of having a collision is of $0.99966\%$ and with $2^{19}$, we have probability of $1$. This mean that we only need to compute $2^{19}$ hash to find a collision, which is much better than have to compute $2^{32}$ hashes.
 
-We decided to use a C++ unordered\_map, which let us insert only unique keys, which are our hashes. If we happen to insert a key that already exist, we can know about it from the object being returned. So we just have to start building the table, and check for an insertion failure, which will indicate a collision. No extra search is required, and the rainbow table might not even have to be fully computed.
+We decided to use a C++ \texttt{std::unordered\_map}, which let us insert only unique keys, which are our hashes. If we happen to insert a key that already exist, we can know about it from the object being returned. So we just have to start building the table, and check for an insertion failure, which will indicate a collision. No extra search is required, and the rainbow table might not even have to be fully computed.
 
 \paragraph{Question 5 : Gather statistics about the expected time (as a number of function calls) necessary to get a
-collision for sip\_hash\_fix32 "in counter mode" for a fixed key. In particular, give the average, minimum, and maximum time over 1000 (or more) distinct keys. Are these results consistant
+collision for \texttt{sip\_hash\_fix32} "in counter mode" for a fixed key. In particular, give the average, minimum, and maximum time over 1000 (or more) distinct keys. Are these results consistant
 with your initial estimate?}
 
 \paragraph{} $2^{19}$ is the maximum function call that need to be done to have a guarentee of finding a collision. On average we need about 25 ms to find a collision, the maximum time required is about 112.022 ms and the minimum time required is about 0.182 ms, on a Intel(R) Core(TM) i5-3317U.
@@ -39,6 +39,6 @@ with your initial estimate?}
 \paragraph{Question 8: Do you think that the key size of twine\_fun1 is large enough to make an exhaustive search of
 the keyspace intractable? Can this function be considered to be collision-resistant?}
 
-\paragraph{} Here, we have $2^{32}$ key possibilities, which is far less than what we had for siphash. An exhaustive search is indeed possible, as computing $2^{32}$ twine\_fun1 on the same machine as question 5 takes less than 5 seconds. The complexity of computing a collision is of $2^{n/2}$, which mean that it is trivial in our case ($2^{16}$).
+\paragraph{} Here, we have $2^{32}$ key possibilities, which is far less than what we had for siphash. An exhaustive search is indeed possible, as computing $2^{32}$ \texttt{twine\_fun1} on the same machine as question 5 takes less than 5 seconds. The complexity of computing a collision is of $2^{n/2}$, which mean that it is trivial in our case ($2^{16}$).
 
 \end{document}
