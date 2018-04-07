@@ -1,15 +1,13 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
 #include <cmath>
+#include <ctime>
 #include <cassert>
 #include <cstring>
 #include <cinttypes>
 #include <unordered_map>
-#include <time.h>
+
 #include <unistd.h>
 #include <endian.h>
 
@@ -337,7 +335,6 @@ uint32_t twine_fun2_fix16(uint32_t k, uint32_t m){
  *********************************/
 
 void question1(){
-    // TODO: peut-etre un probleme avec little/big endian
     printf("\n====================\n");
     printf("==== Question 1 ====\n");
 
@@ -353,22 +350,22 @@ void question1(){
     printf("==== Test 1 ====\n");
     result = siphash_2_4(k, m, 15);
     assert(result == 0xa129ca6149be45e5);
-    printf("OK - 0x%" PRIx64 "\n", result);
+    printf("Assertion passed for siphash_2_4 - 0x%" PRIx64 "\n", result);
 
     printf("==== Test 2 ====\n");
     result = siphash_2_4(k, m2, 8);
     assert(result == 0x93f5f5799a932462);
-    printf("OK - 0x%" PRIx64 "\n", result);
+    printf("Assertion passed for siphash_2_4 - 0x%" PRIx64 "\n", result);
 
     printf("==== Test 3 ====\n");
     result = siphash_2_4(k, NULL, 0);
     assert(result == 0x726fdb47dd0e0e31);
-    printf("OK - 0x%" PRIx64 "\n", result);
+    printf("Assertion passed for siphash_2_4 - 0x%" PRIx64 "\n", result);
 
     printf("==== Test 4 ====\n");
     result = siphash_2_4(k2, NULL, 0);
     assert(result == 0x1e924b9d737700d7);
-    printf("OK - 0x%" PRIx64 "\n", result);
+    printf("Assertion passed for siphash_2_4 - 0x%" PRIx64 "\n", result);
 
     printf("==== More Tests ====\n");
     result = siphash_2_4(k2, m, 15);
@@ -378,52 +375,26 @@ void question1(){
 }
 
 void question3(){
-    printf("\n=====================\n");
+    printf("\n====================\n");
     printf("==== Question 3 ====\n");
 
     uint32_t k, m, result;
-    uint32_t max = 1000000;
+    uint32_t max = 10;
     register uint32_t i;
 
-    printf("SipHash32\n");
-    for (i = 1; i < max; i*=10){
+    for (i = 1; i <= max; i++){
         printf("==== Test %d ====\n", i);
         k = 0;
         m = i;
         result = sip_hash_fix32(k, m);
-        printf("OK - 0x%" PRIx32 "\n", result);
+        printf("sip_hash_fix32 - 0x%" PRIx32 "\n", result);
     }
 
     m = 0;
-
-    printf("==== Test %d ====\n", i + 1);
-    k = 0x03020100;
-    result = sip_hash_fix32(k, m);
-    printf("OK - 0x%" PRIx32 "\n", result);
-    printf("==== Test %d ====\n", i + 2);
-    k = 0x07060504;
-    result = sip_hash_fix32(k, m);
-    printf("OK - 0x%" PRIx32 "\n", result);
-    printf("==== Test %d ====\n", i + 3);
-    k = 0x0b0a0908;
-    result = sip_hash_fix32(k, m);
-    printf("OK - 0x%" PRIx32 "\n", result);
-    printf("==== Test %d ====\n", i + 4);
-    k = 0x0f0e0d0c;
-    result = sip_hash_fix32(k, m);
-    printf("OK - 0x%" PRIx32 "\n", result);
-
-    /*
-       printf("==== Test 4 ====\n");
-       k = 0x03020100;
-       m = 0x03020100;
-       result = sip_hash_fix32(k, m);
-       printf("OK - 0x%" PRIx32 "\n", result);
-       */
 }
 
 void question4(){
-    printf("\n=====================\n");
+    printf("\n====================\n");
     printf("==== Question 4 ====\n");
 
     int i;
@@ -434,7 +405,7 @@ void question4(){
 }
 
 void question5(){
-    printf("\n=====================\n");
+    printf("\n====================\n");
     printf("==== Question 5 ====\n");
     puts("Please wait a few seconds, we are doing a thousand collisions...");
 
@@ -442,7 +413,7 @@ void question5(){
     clock_t t1,t2;
     float tabTemps[1000];
     register int i, j;
-    srandom(time(0));
+    srandom(time(NULL));
     uint32_t k = (uint32_t) random(); // distinct key k
 
     for (i=1; i < 3; i++){
@@ -476,7 +447,7 @@ void question5(){
 }
 
 void question6(){
-    printf("\n=====================\n");
+    printf("\n====================\n");
     printf("==== Question 6 ====\n");
 
     uint64_t input, result;
@@ -485,38 +456,38 @@ void question6(){
     input = 0x0000000000000000ULL;
     result = twine_perm_z(input);
     assert(result == 0xc0c0c0c0c0c0c0c0);
-    printf("OK - 0x%" PRIx64 "\n", result);
+    printf("Assertion passed for twine_perm_z - 0x%" PRIx64 "\n", result);
 
     printf("==== Test 2 ====\n");
     input = 0x123456789abcdef1ULL;
     result = twine_perm_z(input);
     assert(result == 0xb4e946d9ad8f7b29);
-    printf("OK - 0x%" PRIx64 "\n", result);
+    printf("Assertion passed for twine_perm_z - 0x%" PRIx64 "\n", result);
 
     printf("==== Test 3 ====\n");
     input = 0xb4329ed38453aac8ULL;
     result = twine_perm_z(input);
     assert(result == 0x784f5613309457d8);
-    printf("OK - 0x%" PRIx64 "\n", result);
+    printf("Assertion passed for twine_perm_z - 0x%" PRIx64 "\n", result);
 }
 
 void question7(){
-    printf("\n=====================\n");
+    printf("\n====================\n");
     printf("==== Question 7 ====\n");
 
     uint32_t result;
 
     result = twine_fun1(0x00000000, 0x00000000);
     assert(result == 0xc0c0c0c0);
-    printf("OK - 0x%" PRIx32 "\n", result);
+    printf("Assertion passed for twine_fun1 - 0x%" PRIx32 "\n", result);
 
     result = twine_fun1(0xcdef1234, 0xab123478);
     assert(result == 0x6465886c);
-    printf("OK - 0x%" PRIx32 "\n", result);
+    printf("Assertion passed for twine_fun1 - 0x%" PRIx32 "\n", result);
 }
 
 void question9(){
-    printf("\n=====================\n");
+    printf("\n====================\n");
     printf("==== Question 9 ====\n");
     puts("Please wait a few seconds, we are doing a thousand collisions...");
 
@@ -526,7 +497,7 @@ void question9(){
     register int i, j;
     uint32_t k = 0xabcd; // fixed key
 
-    for (i=1; i < 3; i++){
+    for (i=1; i < 2; i++){
         printf("==== Test %d ====\n", i);
         for (j = 0; j < 1000; j++){
             t1 = clock();
@@ -570,23 +541,23 @@ void question10(){
 
     result = twine_fun2(0x00000000, m1, 1);
     assert(result == 0xc57c8cbc);
-    printf("OK twine_fun2 - 0x%" PRIx32 "\n", result);
-
-    result = twine_fun2_fix16(0x00000000, m1_16);
-    assert(result == 0xc57c8cbc);
-    printf("OK twine_fun2_fix16 - 0x%" PRIx32 "\n", result);
+    printf("Assertion passed for twine_fun2 - 0x%" PRIx32 "\n", result);
 
     result = twine_fun2(0x23AE90FF, m2, 2);
     assert(result == 0xab8e124f);
-    printf("OK twine_fun2 - 0x%" PRIx32 "\n", result);
-
-    result = twine_fun2_fix32(0x23AE90FF, m2_32);
-    assert(result == 0xab8e124f);
-    printf("OK twine_fun2_fix32 - 0x%" PRIx32 "\n", result);
+    printf("Assertion passed for twine_fun2 - 0x%" PRIx32 "\n", result);
 
     result = twine_fun2(0xEEEEEEEE, m3, 4);
     assert(result == 0x9941a493);
-    printf("OK twine_fun2 - 0x%" PRIx32 "\n", result);
+    printf("Assertion passed for twine_fun2 - 0x%" PRIx32 "\n", result);
+
+    result = twine_fun2_fix16(0x00000000, m1_16);
+    assert(result == 0xc57c8cbc);
+    printf("Assertion passed for twine_fun2_fix16 - 0x%" PRIx32 "\n", result);
+
+    result = twine_fun2_fix32(0x23AE90FF, m2_32);
+    assert(result == 0xab8e124f);
+    printf("Assertion passed for twine_fun2_fix32 - 0x%" PRIx32 "\n", result);
 }
 
 void question11(){
@@ -668,15 +639,16 @@ void usage(char* name){
     printf("Usage: %s <args>\n", name);
     puts("\t--all\t\tPrint all the questions, including the long one.");
     puts("\t--part1\t\tPrint first part questions (excluding question 5).");
-    puts("\t--question5\tPrint question 5, which take a bit of time.");
     puts("\t--part2\t\tPrint the second part questions.");
+    puts("\t--question5\tPrint question 5, which take a bit of time.");
     puts("\t--question9\tPrint question 9, which take a bit of time.");
     puts("\t--question11\tPrint question 11, which take a bit of time.");
+    puts("\t--questionN\tPrint question N (N in {1,3,4,5,6,7,9,10,11}).");
 }
 
 /********************************
- *             MAIN              *
- *********************************/
+ *             MAIN             *
+ ********************************/
 
 int main(int argc, char** argv){
     if (argc < 2){
@@ -693,13 +665,14 @@ int main(int argc, char** argv){
             question10();
             question11();
         } else if (strcmp(argv[1], "--part1") == 0){
-            puts("First questions of part 1...");
+            puts("Outputting first questions of part 1...");
             question1();
             question3();
             question4();
         } else if (strcmp(argv[1], "--question5") == 0){
             question5();
         } else if (strcmp(argv[1], "--part2") == 0){
+            puts("Outputting first questions of part 2...");
             question6();
             question7();
             question10();
@@ -707,6 +680,18 @@ int main(int argc, char** argv){
             question9();
         } else if (strcmp(argv[1], "--question11") == 0){
             question11();
+        } else if (strcmp(argv[1], "--question1") == 0){
+            question1();
+        } else if (strcmp(argv[1], "--question3") == 0){
+            question3();
+        } else if (strcmp(argv[1], "--question4") == 0){
+            question4();
+        } else if (strcmp(argv[1], "--question6") == 0){
+            question6();
+        } else if (strcmp(argv[1], "--question7") == 0){
+            question7();
+        } else if (strcmp(argv[1], "--question10") == 0){
+            question10();
         } else {
             usage(argv[0]);
         }
