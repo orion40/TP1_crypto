@@ -214,15 +214,16 @@ uint32_t sip_hash_fix32(uint32_t k, uint32_t m){
 uint64_t coll_search(uint32_t k, uint32_t (*fun)(uint32_t, uint32_t)){
     uint32_t max = 2<<19;
     std::unordered_map<uint32_t, uint32_t> hashmap;
+    register uint32_t i;
 
-    //puts("Computing rainbow table & checking for collisions...");
-    for (uint32_t i = 0; i < max; i++){
-        std::pair<std::unordered_map<uint32_t, uint32_t>::iterator, bool > result;
-        result = hashmap.insert({fun(k,i), i});
-        if (result.second == false)
+    // C++'s unordered_map return a std::pair, which contains the
+    // index of the element, and a boolean indicating wether the
+    // insertion succeeded or not. This is this boolean that we
+    // are checking here.
+    for (i = 0; i < max; i++){
+        if (hashmap.insert({fun(k,i), i}).second == false)
             return i;
     }
-    //puts("Done. No collision found.");
 
     return 0;
 }
@@ -268,6 +269,7 @@ uint64_t twine_perm_z(uint64_t input){
     pi[12] = 15;  pi[13] = 10;  pi[14] = 11;
     pi[15] = 14;
 
+    // Découpages en nibbles
     for (int i = 0; i < 16; i++)
     {
         X[0][i] = (input >> (4*i)) & 0xF;
@@ -285,6 +287,7 @@ uint64_t twine_perm_z(uint64_t input){
         X[35][2*j+1] = SBox[X[35][2*j]] ^ X[35][2*j+1];
     }
 
+    // Mise en forme du résultat
     for (int i = 0; i < 16; i++)
     {
         output ^= (uint64_t)X[35][i] << (4*i);
@@ -298,7 +301,7 @@ uint64_t twine_perm_z(uint64_t input){
  * Chiffre un message via twine_perm_z
  *  @ARG
  *      - un uint32_t 'k' clé de chiffrement
- *		- un uint32_t 'm' message à chiffrer
+ *      - un uint32_t 'm' message à chiffrer
  *  @RETURN
  *      -uint32_t 'output' message chiffré
  */
@@ -433,6 +436,7 @@ void question4(){
 void question5(){
     printf("\n=====================\n");
     printf("==== Question 5 ====\n");
+    puts("Please wait a few seconds, we are doing a thousand collisions...");
 
     float min, max, average;
     clock_t t1,t2;
@@ -514,6 +518,7 @@ void question7(){
 void question9(){
     printf("\n=====================\n");
     printf("==== Question 9 ====\n");
+    puts("Please wait a few seconds, we are doing a thousand collisions...");
 
     float min, max, average;
     clock_t t1,t2;
@@ -587,14 +592,86 @@ void question10(){
 void question11(){
     printf("\n=====================\n");
     printf("==== Question 11 ====\n");
+    puts("Please wait a few seconds, we are doing a thousand collisions...");
 
+    puts("Gathering stats for twine_fun2_fix32...");
+    float min, max, average;
+    clock_t t1,t2;
+    float tabTemps[1000];
+    register int i, j;
+    uint32_t k = 0xabcd; // fixed key
+
+    for (i=1; i < 3; i++){
+        printf("==== Test %d ====\n", i);
+        for (j = 0; j < 1000; j++){
+            t1 = clock();
+            coll_search(k, &twine_fun2_fix32);
+            t2 = clock();
+            tabTemps[j]= (float)(t2-t1)/CLOCKS_PER_SEC;
+        }
+
+        min = max = average = tabTemps[0];
+
+        for (j = 1; j < 1000; j++){
+#ifdef DEBUG
+            printf("t%d : %f   ",j, tabTemps[j]);
+#endif
+
+            if (min > tabTemps[j])
+                min = tabTemps[j];
+            if (max < tabTemps[j])
+                max = tabTemps[j];
+            average += tabTemps[j];
+        }
+
+        printf("temps min = %f s\n", min);
+        printf("temps max = %f s\n", max);
+        printf("temps moyen = %f s\n", average/1000);
+
+        k++;
+    }
+
+    puts("Gathering stats for twine_fun2_fix16...");
+
+    for (i=1; i < 3; i++){
+        printf("==== Test %d ====\n", i);
+        for (j = 0; j < 1000; j++){
+            t1 = clock();
+            coll_search(k, &twine_fun2_fix16);
+            t2 = clock();
+            tabTemps[j]= (float)(t2-t1)/CLOCKS_PER_SEC;
+        }
+
+        min = max = average = tabTemps[0];
+
+        for (j = 1; j < 1000; j++){
+#ifdef DEBUG
+            printf("t%d : %f   ",j, tabTemps[j]);
+#endif
+
+            if (min > tabTemps[j])
+                min = tabTemps[j];
+            if (max < tabTemps[j])
+                max = tabTemps[j];
+            average += tabTemps[j];
+        }
+
+        printf("temps min = %f s\n", min);
+        printf("temps max = %f s\n", max);
+        printf("temps moyen = %f s\n", average/1000);
+
+        k++;
+    }
 }
 
 void usage(char* name){
     printf("Usage: %s <args>\n", name);
+    puts("\t--all\t\tPrint all the questions, including the long one.");
     puts("\t--part1\t\tPrint first part questions (excluding question 5).");
     puts("\t--question5\tPrint question 5, which take a bit of time.");
     puts("\t--part2\t\tPrint the second part questions.");
+    puts("\t--question9\tPrint question 9, which take a bit of time.");
+    puts("\t--question11\tPrint question 11, which take a bit of time.");
 }
 
 /********************************
@@ -605,23 +682,30 @@ int main(int argc, char** argv){
     if (argc < 2){
         usage(argv[0]);
     } else {
-        if (strcmp(argv[1], "--part1") == 0){
+        if (strcmp(argv[1], "--all") == 0){
+            question1();
+            question3();
+            question4();
+            question5();
+            question6();
+            question7();
+            question9();
+            question10();
+            question11();
+        } else if (strcmp(argv[1], "--part1") == 0){
             puts("First questions of part 1...");
             question1();
             question3();
             question4();
         } else if (strcmp(argv[1], "--question5") == 0){
-            puts("Question 5 - please wait a few seconds, we are doing a thousand collisions...");
             question5();
         } else if (strcmp(argv[1], "--part2") == 0){
             question6();
             question7();
             question10();
         } else if (strcmp(argv[1], "--question9") == 0){
-            puts("Question 9 - please wait a few seconds, we are doing a thousand collisions...");
             question9();
         } else if (strcmp(argv[1], "--question11") == 0){
-            puts("Question 11 - please wait a few seconds, we are doing a thousand collisiosn...");
             question11();
         } else {
             usage(argv[0]);
