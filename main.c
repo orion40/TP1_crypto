@@ -46,6 +46,7 @@ void question6();
 void question7();
 void question9();
 void question10();
+void question11();
 
 /********************************
  *           FUNCTIONS           *
@@ -433,11 +434,10 @@ void question5(){
     printf("\n=====================\n");
     printf("==== Question 5 ====\n");
 
-    float min, max, moyenne;
+    float min, max, average;
     clock_t t1,t2;
     float tabTemps[1000];
-    int i;
-    register int j;
+    register int i, j;
     srandom(time(0));
     uint32_t k = (uint32_t) random(); // distinct key k
 
@@ -451,7 +451,7 @@ void question5(){
             k++;
         }
 
-        min = max = moyenne = tabTemps[0];
+        min = max = average = tabTemps[0];
 
         for (j = 1; j < 1000; j++){
 #ifdef DEBUG
@@ -462,12 +462,12 @@ void question5(){
                 min = tabTemps[j];
             if (max < tabTemps[j])
                 max = tabTemps[j];
-            moyenne += tabTemps[j];
+            average += tabTemps[j];
         }
 
         printf("temps min = %f s\n", min);
         printf("temps max = %f s\n", max);
-        printf("temps moyen = %f s\n", moyenne/1000);
+        printf("temps moyen = %f s\n", average/1000);
     }
 }
 
@@ -515,11 +515,10 @@ void question9(){
     printf("\n=====================\n");
     printf("==== Question 9 ====\n");
 
-    float min, max, moyenne;
+    float min, max, average;
     clock_t t1,t2;
     float tabTemps[1000];
-    int i;
-    register int j;
+    register int i, j;
     uint32_t k = 0xabcd; // fixed key
 
     for (i=1; i < 3; i++){
@@ -531,7 +530,7 @@ void question9(){
             tabTemps[j]= (float)(t2-t1)/CLOCKS_PER_SEC;
         }
 
-        min = max = moyenne = tabTemps[0];
+        min = max = average = tabTemps[0];
 
         for (j = 1; j < 1000; j++){
 #ifdef DEBUG
@@ -542,12 +541,12 @@ void question9(){
                 min = tabTemps[j];
             if (max < tabTemps[j])
                 max = tabTemps[j];
-            moyenne += tabTemps[j];
+            average += tabTemps[j];
         }
 
         printf("temps min = %f s\n", min);
         printf("temps max = %f s\n", max);
-        printf("temps moyen = %f s\n", moyenne/1000);
+        printf("temps moyen = %f s\n", average/1000);
 
         k++;
     }
@@ -585,6 +584,12 @@ void question10(){
     printf("OK twine_fun2 - 0x%" PRIx32 "\n", result);
 }
 
+void question11(){
+    printf("\n=====================\n");
+    printf("==== Question 11 ====\n");
+
+}
+
 void usage(char* name){
     printf("Usage: %s <args>\n", name);
     puts("\t--part1\t\tPrint first part questions (excluding question 5).");
@@ -606,15 +611,18 @@ int main(int argc, char** argv){
             question3();
             question4();
         } else if (strcmp(argv[1], "--question5") == 0){
-            puts("Question 5 - please wait a few seconds, we are looking for a thousand collision...");
+            puts("Question 5 - please wait a few seconds, we are doing a thousand collisions...");
             question5();
         } else if (strcmp(argv[1], "--part2") == 0){
             question6();
             question7();
             question10();
         } else if (strcmp(argv[1], "--question9") == 0){
-            puts("Question 9 - please wait a few seconds, we are looking for a thousand collision...");
+            puts("Question 9 - please wait a few seconds, we are doing a thousand collisions...");
             question9();
+        } else if (strcmp(argv[1], "--question11") == 0){
+            puts("Question 11 - please wait a few seconds, we are doing a thousand collisiosn...");
+            question11();
         } else {
             usage(argv[0]);
         }
