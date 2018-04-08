@@ -7,7 +7,7 @@
 \title{Report for TP1 Cryptography}
 \maketitle
 
-\paragraph{Instructions: \\} This is the report of the lab work for the cryptography class. To use the project, compile using \texttt{make}, and launch with an argument using '\texttt{./tp1}'. The available arguments are '\texttt{--part1}' which use the functions of part 1, except question 5; '\texttt{--question5}' which does the question 5 (which takes a while to be done, less than a minute), '\texttt{--part2}', which use the functions of part 2, except for question 9 and 11 which take a while to be done. Each of those function can be called individually (using '\texttt{--question9}' or '\texttt{--question11}') For exemple: \texttt{make \&\& ./tp1 --question9}. \\ Assertions are used when test values are provided to make sure we have the correct values. \\Any question can be called using the flag '\texttt{--questionN}', as long as $N \in \{1,3,4,5,6,7,9,10,11\}$. \\To call every questions, you can use '\texttt{./tp1 --all}'.
+\paragraph{Instructions: \\} This is the report of the lab work for the cryptography class. To use the project, compile using \texttt{make}, and launch with an argument using '\texttt{./tp1}'. The available arguments are '\texttt{--part1}' which use the functions of part 1, except question 5; '\texttt{--question5}' which does the question 5 (which takes a while to be done, less than a minute), '\texttt{--part2}', which use the functions of part 2, except for question 9 and 11 which take a while to be done. Each of those function can be called individually (using '\texttt{--question9}' or '\texttt{--question11}') For exemple: \texttt{make \&\& ./tp1 --question9}. \\ Assertions are used when test values are provided to make sure we have the correct values. \\Any question can be called using the flag '\texttt{--questionN}', as long as $N \in \{1,3,4,5,6,7,9,10,11\}$. There is also a short version for those commands: '\texttt{--qN}'. \\To call every questions, you can use '\texttt{./tp1 --all}'.
 
 \paragraph{Question 2 : Do you think that the key size of \texttt{sip\_hash\_2\_4} is large enough to make an exhaustive search of the keyspace intractable? Can this function be considered to be collision-resistant?}
 
@@ -48,5 +48,10 @@ collision for \texttt{twine\_fun1} “in counter mode” for a fixed key. In par
 
 \paragraph{Question 11: Gather statistics about the expected time (as a number of function calls) necessary to get a
 collision for \texttt{twine\_fun2\_fix32} and \texttt{twine\_fun2\_fix16} “in counter mode” for a fixed key. In particular, give the average, minimum, and maximum time over 1000 (or more) distinct keys. How do these results compare with \texttt{sip\_hash\_fix32} and \texttt{twine\_fun1} ? How can you explain these results?}
+
+\paragraph{} For \texttt{twine\_fun2\_fix32}, it takes on average 52ms, with a minimum of 48ms and a maximum of 73ms.
+\texttt{twine\_fun2\_fix16} takes on average 44ms, with a minimum of 40ms and a maximum of 64 ms. 
+
+Since both of these functions are wrappers for \texttt{twine\_fun2} which itself calls \texttt{twine\_fun1}, those results are not surprising. The fix16 version is faster because we don't even need to go into the loop of \texttt{twine\_fun2}.
 
 \end{document}

@@ -12,7 +12,7 @@
 #include <endian.h>
 
 /********************************
-*           GLOBAL VAR          *
+*           GLOBAL MACROS       *
 *********************************/
 
 #define COMPRESION_ROUNDS 2
@@ -444,7 +444,7 @@ void question5(){
     srandom(time(NULL));
     uint32_t k = (uint32_t) random(); // distinct key k
 
-    for (i=1; i < 3; i++){
+    for (i=1; i < 2; i++){
         printf("==== Test %d ====\n", i);
         for (j = 0; j < 1000; j++){
             t1 = clock();
@@ -676,6 +676,7 @@ void usage(char* name){
     puts("\t--question9\tPrint question 9, which take a bit of time.");
     puts("\t--question11\tPrint question 11, which take a bit of time.");
     puts("\t--questionN\tPrint question N (N in {1,3,4,5,6,7,9,10,11}).");
+    puts("\t--qN\tPrint question N (N in {1,3,4,5,6,7,9,10,11}).");
 }
 
 /********************************
