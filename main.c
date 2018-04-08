@@ -296,7 +296,7 @@ uint64_t twine_perm_z(uint64_t input){
 
 /*
  * Fonction twine_fun1 :
- * Chiffre un message via twine_perm_z
+ * Chiffre un message de taille fixe via twine_perm_z
  *  @ARG
  *      - un uint32_t 'k' clé de chiffrement
  *      - un uint32_t 'm' message à chiffrer
@@ -307,6 +307,16 @@ uint32_t twine_fun1(uint32_t k, uint32_t m){
     return (uint32_t) twine_perm_z(((uint64_t)k << 32) ^ m);
 }
 
+/*
+ * Fonction twine_fun2 :
+ * Chiffre un message de taille variable via twine_fun1
+ *  @ARG
+ *      - un uint32_t 'k' clé de chiffrement
+ *      - un uint16_t* 'm' message à chiffrer
+ *		- un unsigned 'mlen' taille du message
+ *  @RETURN
+ *      -uint32_t 'result' message chiffré
+ */
 uint32_t twine_fun2(uint32_t k, uint16_t *m, unsigned mlen){
     unsigned int i;
     uint32_t result = twine_fun1(k, (0xFFFF << 16) ^ m[0]);
@@ -317,6 +327,15 @@ uint32_t twine_fun2(uint32_t k, uint16_t *m, unsigned mlen){
     return result;
 }
 
+/*
+ * Fonction twine_fun2_fix32 :
+ * Chiffre un message via twine_fun2 ( en 2 partie)
+ *  @ARG
+ *      - un uint32_t 'k' clé de chiffrement
+ *      - un uint32_t 'm' message à chiffrer
+ *  @RETURN
+ *      -uint32_t  message chiffré
+ */
 uint32_t twine_fun2_fix32(uint32_t k, uint32_t m){
     uint16_t message[2];
     message[0] = m >> 16;
@@ -324,6 +343,15 @@ uint32_t twine_fun2_fix32(uint32_t k, uint32_t m){
     return twine_fun2(k, message, 2);
 }
 
+/*
+ * Fonction twine_fun2_fix16 :
+ * Chiffre un message via twine_fun2
+ *  @ARG
+ *      - un uint32_t 'k' clé de chiffrement
+ *      - un uint32_t 'm' message à chiffrer
+ *  @RETURN
+ *      -uint32_t 'output' message chiffré
+ */
 uint32_t twine_fun2_fix16(uint32_t k, uint32_t m){
     uint16_t message[1];
     message[0] = m;
@@ -635,6 +663,10 @@ void question11(){
     }
 }
 
+/*
+ * Procedure usage :
+ * Affiche l'usage des fonctions
+ */
 void usage(char* name){
     printf("Usage: %s <args>\n", name);
     puts("\t--all\t\tPrint all the questions, including the long one.");
@@ -664,34 +696,34 @@ int main(int argc, char** argv){
             question9();
             question10();
             question11();
-        } else if (strcmp(argv[1], "--part1") == 0){
+        } else if (strcmp(argv[1], "--part1") == 0 || strcmp(argv[1], "--p1") == 0 ){
             puts("Outputting first questions of part 1...");
             question1();
             question3();
             question4();
-        } else if (strcmp(argv[1], "--question5") == 0){
-            question5();
-        } else if (strcmp(argv[1], "--part2") == 0){
+        } else if (strcmp(argv[1], "--part2") == 0  || strcmp(argv[1], "--p2") == 0 ){
             puts("Outputting first questions of part 2...");
             question6();
             question7();
             question10();
-        } else if (strcmp(argv[1], "--question9") == 0){
-            question9();
-        } else if (strcmp(argv[1], "--question11") == 0){
-            question11();
-        } else if (strcmp(argv[1], "--question1") == 0){
+        } else if (strcmp(argv[1], "--question1") == 0 || strcmp(argv[1], "--q1") == 0 ){
             question1();
-        } else if (strcmp(argv[1], "--question3") == 0){
+        } else if (strcmp(argv[1], "--question3") == 0 || strcmp(argv[1], "--q3") == 0 ){
             question3();
-        } else if (strcmp(argv[1], "--question4") == 0){
+        } else if (strcmp(argv[1], "--question4") == 0 || strcmp(argv[1], "--q4") == 0 ){
             question4();
-        } else if (strcmp(argv[1], "--question6") == 0){
+        } else if (strcmp(argv[1], "--question5") == 0 || strcmp(argv[1], "--q5") == 0 ){
+            question5();
+        } else if (strcmp(argv[1], "--question6") == 0 || strcmp(argv[1], "--q6") == 0 ){
             question6();
-        } else if (strcmp(argv[1], "--question7") == 0){
+        } else if (strcmp(argv[1], "--question7") == 0 || strcmp(argv[1], "--q7") == 0 ){
             question7();
-        } else if (strcmp(argv[1], "--question10") == 0){
+        } else if (strcmp(argv[1], "--question9") == 0 || strcmp(argv[1], "--q9") == 0 ){
+            question9();
+        } else if (strcmp(argv[1], "--question10") == 0 || strcmp(argv[1], "--q10") == 0 ){
             question10();
+        } else if (strcmp(argv[1], "--question11") == 0 || strcmp(argv[1], "--q11") == 0 ){
+            question11();
         } else {
             usage(argv[0]);
         }
